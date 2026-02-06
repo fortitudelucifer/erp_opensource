@@ -1,0 +1,93 @@
+{#
+  edit.html - 编辑项目/合同 / Edit Project/Contract
+  
+  用于编辑现有合同的基本信息表单页面：
+  Form page for editing basic information of existing contracts:
+  
+  Form Fields / 表单字段:
+  - 客户公司 / Client company
+  - 项目编号 / Project code
+  - 合同编号 / Contract number
+  - 合同名称 / Contract name
+  - 客户负责人 / Client manager
+  - 联系方式 / Contact info
+  - 我方负责人 / Our manager
+  - 合同备注 / Remarks
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - contract: 合同对象 / Contract object
+  - company: 关联公司 / Related company
+  - user: 当前用户 / Current user
+#}
+{% extends 'base.html' %}
+
+{% block content %}
+{# 表单容器：玻璃拟态卡片 / Form container: glassmorphism card #}
+<div class="glass-panel" style="padding: 32px; max-width: 800px; margin: 0 auto; border-radius: 12px;">
+    {# 页面标题和返回按钮 / Page title and back button #}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <h2 style="margin: 0; font-size: 1.75rem; font-weight: 700;">编辑项目 / 合同</h2>
+        <a href="{{ url_for('contracts.list_contracts') }}" class="btn-industrial" style="background: transparent; border: 1px solid rgba(255,255,255,0.2);">返回列表</a>
+    </div>
+
+    {# 编辑表单 / Edit form #}
+    <form method="post" action="{{ url_for('contracts.edit_contract', contract_id=contract.id) }}">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">客户公司</label>
+                <input type="text" name="company_name" class="form-control" style="width: 100%; box-sizing: border-box;" 
+                       value="{{ company.name if company else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">项目编号</label>
+                <input type="text" name="project_code" class="form-control" style="width: 100%; box-sizing: border-box;"
+                       value="{{ contract.project_code or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">合同编号</label>
+                <input type="text" name="contract_number" class="form-control" style="width: 100%; box-sizing: border-box;"
+                       value="{{ contract.contract_number or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">合同名称</label>
+                <input type="text" name="name" class="form-control" style="width: 100%; box-sizing: border-box;"
+                       value="{{ contract.name or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">客户负责人</label>
+                <input type="text" name="client_manager" class="form-control" style="width: 100%; box-sizing: border-box;"
+                       value="{{ contract.client_manager or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">联系方式</label>
+                <input type="text" name="client_contact" class="form-control" style="width: 100%; box-sizing: border-box;"
+                       value="{{ contract.client_contact or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">我方负责人</label>
+                <input type="text" name="our_manager" class="form-control" style="width: 100%; box-sizing: border-box;"
+                       value="{{ contract.our_manager or '' }}">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 24px;">
+            <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">合同备注</label>
+            <textarea name="remark" class="form-control" rows="4" style="width: 100%; box-sizing: border-box;">{{ contract.remark or '' }}</textarea>
+        </div>
+
+        <div style="margin-top: 32px; display: flex; gap: 16px;">
+            <button type="submit" class="btn-industrial" style="padding: 10px 32px; font-size: 1rem;">保存修改</button>
+            <a href="{{ url_for('contracts.list_contracts') }}" class="btn-industrial" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 10px 32px; font-size: 1rem;">取消</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

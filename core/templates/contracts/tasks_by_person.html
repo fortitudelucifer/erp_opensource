@@ -1,0 +1,204 @@
+{#
+  tasks_by_person.html - 人员任务看板 / Tasks by Person Dashboard
+  
+  按人员分组查看所有项目任务：
+  View all project tasks grouped by person:
+  
+  Features / 功能:
+  - 按人员分组显示任务 / Tasks grouped by person
+  - 状态筛选 (已完成/进行中等) / Status filter
+  - 今日任务筛选 / Today's tasks filter
+  - 统计卡片 (今日/待办/已完成/总数) / Stats cards
+  - 未指派任务单独分组 / Unassigned tasks group
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - persons: 人员列表 / Person list
+  - tasks_by_person: 按人员 ID 分组的任务字典 / Tasks dict by person ID
+  - stats: 统计数据 / Statistics
+  - status_choices: 状态选项 / Status options
+  - current_status: 当前筛选状态 / Current filter status
+  - only_today: 是否只看今日 / Today only flag
+  - today: 今日日期 / Today's date
+#}
+{% extends 'base.html' %}
+
+{% block title %}人员任务看板 - {{ config.COMPANY_NAME }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+    {# 页面头部和视图切换 / Page header and view switcher #}
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700;">人员任务看板</h2>
+            <div style="font-size: 0.9rem; color: var(--color-text-sub);">
+                <a href="{{ url_for('contracts.tasks_by_department') }}" style="color: var(--color-text-sub); text-decoration: none;">按部门</a>
+                <span style="margin: 0 8px; opacity: 0.3;">|</span>
+                <span style="color: var(--color-primary); font-weight: 600;">按人员</span>
+                <span style="margin: 0 8px; opacity: 0.3;">|</span>
+                <a href="{{ url_for('contracts.list_contracts') }}" style="color: var(--color-text-sub); text-decoration: none;">返回列表</a>
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <form method="get" class="glass-panel" style="padding: 12px 16px; border-radius: 8px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
+            <div>
+                <select name="status" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 0.9rem;">
+                    <option value="">所有状态</option>
+                    {% for s in status_choices %}
+                    {% if s %}
+                    <option value="{{ s }}" {% if current_status==s %}selected{% endif %}>{{ s }}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: pointer; color: var(--color-text-main);">
+                <input type="checkbox" name="only_today" value="y" {% if only_today %}checked{% endif %} style="accent-color: var(--color-primary);">
+                <span>只看今日 ({{ today.strftime('%m-%d') }})</span>
+            </label>
+            <button type="submit" class="btn-industrial" style="padding: 6px 16px; font-size: 0.85rem;">筛选</button>
+        </form>
+    </div>
+
+    <!-- Stats Cards (Bento) -->
+    {% if stats %}
+    <div class="bento-grid" style="grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
+        <div class="bento-item card" style="padding: 16px;">
+            <div style="color: var(--color-text-sub); font-size: 0.85rem;">今日任务</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-top: 4px;">{{ stats.today }}</div>
+        </div>
+        <div class="bento-item card" style="padding: 16px;">
+            <div style="color: var(--color-text-sub); font-size: 0.85rem;">待办任务</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-warning); margin-top: 4px;">{{ stats.todo }}</div>
+        </div>
+        <div class="bento-item card" style="padding: 16px;">
+            <div style="color: var(--color-text-sub); font-size: 0.85rem;">已完成</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-accent); margin-top: 4px;">{{ stats.done }}</div>
+        </div>
+        <div class="bento-item card" style="padding: 16px;">
+            <div style="color: var(--color-text-sub); font-size: 0.85rem;">当前筛选总数</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-text-main); margin-top: 4px;">{{ stats.total }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if stats.total == 0 %}
+    <div style="text-align: center; padding: 48px; color: var(--color-text-sub); border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">
+        当前没有符合筛选条件的任务。
+    </div>
+    {% endif %}
+
+    <!-- Person Loop -->
+    <div style="display: flex; flex-direction: column; gap: 32px;">
+    {% for person in persons %}
+        {% set person_tasks = tasks_by_person.get(person.id, []) %}
+        {% if person_tasks %}
+        <div>
+            <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; color: var(--color-text-main); border-left: 3px solid var(--color-primary); padding-left: 12px;">
+                {{ person.name }} 
+                <span style="font-size: 0.85rem; color: var(--color-text-sub); font-weight: normal; margin-left: 8px;">
+                    ({{ person_tasks|length }} 条)
+                </span>
+            </h3>
+            <div class="table-container">
+                <table class="ind-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">编号</th>
+                            <th style="width: 20%;">合同名称</th>
+                            <th style="width: 15%;">部门</th>
+                            <th style="width: 20%;">任务名称</th>
+                            <th style="width: 15%;">排期</th>
+                            <th style="width: 10%;">状态</th>
+                            <th style="width: 10%;">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in person_tasks %}
+                        <tr>
+                            <td style="font-family: monospace; color: var(--color-primary);">{{ task.contract.project_code }}</td>
+                            <td><a href="{{ url_for('contracts.manage_tasks', contract_id=task.contract.id) }}" style="color: var(--color-text-main);">{{ task.contract.name }}</a></td>
+                            <td>{{ task.department.name if task.department else '-' }}</td>
+                            <td style="font-weight: 500;">{{ task.title }}</td>
+                            <td>
+                                <div style="font-size: 0.85rem; color: var(--color-text-sub);">
+                                    {% if task.start_date %}{{ task.start_date.strftime('%m-%d') }}{% endif %} 
+                                    → 
+                                    {% if task.end_date %}{{ task.end_date.strftime('%m-%d') }}{% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if task.status == '已完成' %} <span class="status-badge success">已完成</span>
+                                {% elif task.status == '进行中' %} <span class="status-badge active">进行中</span>
+                                {% elif task.status == '已暂停' %} <span class="status-badge warning">已暂停</span>
+                                {% else %} <span class="status-badge">{{ task.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size: 0.85rem; color: var(--color-text-sub);">{{ task.remarks or '' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    <!-- Unassigned Loop -->
+    {% set unassigned_tasks = tasks_by_person.get(None, []) %}
+    {% if unassigned_tasks %}
+        <div>
+            <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; color: var(--color-warning); border-left: 3px solid var(--color-warning); padding-left: 12px;">
+                未指派 
+                <span style="font-size: 0.85rem; color: var(--color-text-sub); font-weight: normal; margin-left: 8px;">
+                    ({{ unassigned_tasks|length }} 条)
+                </span>
+            </h3>
+            <div class="table-container">
+                <table class="ind-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">编号</th>
+                            <th style="width: 20%;">合同名称</th>
+                            <th style="width: 15%;">部门</th>
+                            <th style="width: 20%;">任务名称</th>
+                            <th style="width: 15%;">排期</th>
+                            <th style="width: 10%;">状态</th>
+                            <th style="width: 10%;">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in unassigned_tasks %}
+                        <tr>
+                            <td style="font-family: monospace; color: var(--color-primary);">{{ task.contract.project_code }}</td>
+                            <td><a href="{{ url_for('contracts.manage_tasks', contract_id=task.contract.id) }}" style="color: var(--color-text-main);">{{ task.contract.name }}</a></td>
+                            <td>{{ task.department.name if task.department else '-' }}</td>
+                            <td style="font-weight: 500;">{{ task.title }}</td>
+                            <td>
+                                <div style="font-size: 0.85rem; color: var(--color-text-sub);">
+                                    {% if task.start_date %}{{ task.start_date.strftime('%m-%d') }}{% endif %} 
+                                    → 
+                                    {% if task.end_date %}{{ task.end_date.strftime('%m-%d') }}{% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if task.status == '已完成' %} <span class="status-badge success">已完成</span>
+                                {% elif task.status == '进行中' %} <span class="status-badge active">进行中</span>
+                                {% elif task.status == '已暂停' %} <span class="status-badge warning">已暂停</span>
+                                {% else %} <span class="status-badge">{{ task.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size: 0.85rem; color: var(--color-text-sub);">{{ task.remarks or '' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+    </div>
+</div>
+{% endblock %}

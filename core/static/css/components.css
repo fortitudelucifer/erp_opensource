@@ -1,0 +1,441 @@
+/* 玻璃拟态面板 */
+.glass-panel {
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* 卡片组件 */
+.card {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-card);
+  padding: calc(var(--spacing-unit) * 3);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 工业风按钮 */
+.btn-industrial {
+  background-color: var(--color-primary);
+  color: #fff;
+  padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+  border-radius: 4px; /* 更具棱角，体现工业感 */
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn-industrial:hover {
+  background-color: #2563eb; /* 颜色稍深一些 */
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-industrial:active {
+  transform: translateY(0);
+}
+
+/* 状态标签 */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* 内容居中 */
+  padding: 4px 12px; /* 稍微增加内边距 */
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text-main);
+  white-space: nowrap; /* 防止换行 */
+  min-width: 80px; /* 确保最小宽度以保持统一 */
+}
+
+.status-badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  background-color: var(--color-text-sub);
+}
+
+/* 特定状态颜色 */
+.status-badge.success, .status-badge.accepted { 
+    background-color: rgba(16, 185, 129, 0.15); 
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #a7f3d0;
+}
+.status-badge.success::before, .status-badge.accepted::before { 
+    background-color: #10b981; 
+    box-shadow: 0 0 5px #10b981; 
+}
+
+/* 生产中 (In Production) - 紫色用于区分 */
+.status-badge.production {
+    background-color: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: #ddd6fe;
+}
+.status-badge.production::before {
+    background-color: #8b5cf6;
+    box-shadow: 0 0 5px #8b5cf6;
+}
+
+/* 进行中 (In Progress) - 蓝色 */
+.status-badge.active, .status-badge.processing {
+    background-color: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #bfdbfe;
+}
+.status-badge.active::before, .status-badge.processing::before {
+    background-color: #3b82f6;
+    box-shadow: 0 0 5px #3b82f6;
+}
+
+/* 验收中 (Acceptance) - 橙色 */
+.status-badge.acceptance, .status-badge.warning, .status-badge.acceptance_with_issues { 
+    background-color: rgba(245, 158, 11, 0.15); 
+    border-color: rgba(245, 158, 11, 0.3); 
+    color: #fde68a;
+}
+.status-badge.acceptance::before, .status-badge.warning::before, .status-badge.acceptance_with_issues::before { 
+    background-color: #f59e0b; 
+    box-shadow: 0 0 5px #f59e0b; 
+}
+
+/* 未启动 (Unstarted) - 灰色 */
+.status-badge.unstarted, .status-badge.pending {
+    background-color: rgba(148, 163, 184, 0.15);
+    border-color: rgba(148, 163, 184, 0.3);
+    color: #cbd5e1;
+}
+.status-badge.unstarted::before, .status-badge.pending::before {
+    background-color: #94a3b8;
+}
+
+.status-badge.danger { 
+    background-color: rgba(239, 68, 68, 0.15); 
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+}
+.status-badge.danger::before { 
+    background-color: #ef4444; 
+    box-shadow: 0 0 5px #ef4444; 
+}
+
+
+/* 表单控件样式 (工业风) */
+.form-control {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-main);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 32px;
+}
+option {
+    background-color: #1e293b;
+    color: #fff;
+}
+
+/* 响应式容器 */
+.responsive-container {
+  width: 90%;
+  max-width: 1400px; /* 仪表盘视图宽度更大 */
+  margin: 0 auto;
+  padding: 0 calc(var(--spacing-unit) * 2);
+}
+
+/* =========================================
+   Bento 栅格系统
+   ========================================= */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .bento-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.bento-item {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.col-span-2 { grid-column: span 1; }
+.col-span-4 { grid-column: span 1; }
+@media (min-width: 768px) {
+  .col-span-2 { grid-column: span 2; }
+}
+@media (min-width: 1200px) {
+  .col-span-4 { grid-column: span 4; }
+}
+
+/* =========================================
+   移动端导航
+   ========================================= */
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--color-text-main);
+  cursor: pointer;
+  padding: 8px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  /* 移动端默认隐藏桌面导航链接 */
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-bg-deep); /* 使用实貌色或玻璃拟态 */
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    flex-direction: column;
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    z-index: 999;
+  }
+
+  .nav-links.active {
+    display: flex;
+    animation: slideDown 0.3s ease-out;
+  }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   视图切换器
+   ========================================= */
+.view-switcher {
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.view-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-sub);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.view-btn.active {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  font-weight: 500;
+}
+
+.view-btn:hover:not(.active) {
+  background-color: rgba(255,255,255,0.05);
+  color: var(--color-text-main);
+}
+
+/* =========================================
+   工业风表格
+   ========================================= */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+  background-color: var(--color-surface);
+}
+
+.ind-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  /* min-width: 1200px;  移除以防止子模块强制滚动 */
+}
+
+/* 粘性表头 */
+.ind-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #1a2332; /* Slightly darker than surface */
+  color: var(--color-text-sub);
+  font-weight: 600;
+  text-align: center !important; /* 强制表头居中 */
+  padding: 12px 16px;
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.ind-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--color-text-main);
+  vertical-align: middle; /* 从 top 改为 middle 以获得更好的垂直对齐 */
+  text-align: center; /* 单元格内容居中 */
+}
+
+/* 斑马纹 */
+.ind-table tbody tr:nth-child(even) {
+  background-color: rgba(255,255,255,0.01);
+}
+
+.ind-table tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.05); /* 赛博蓝调色 */
+}
+
+/* 表格链接 */
+.ind-table a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.ind-table a:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   卡片视图 (移动端 / 切换)
+   ========================================= */
+.contract-card-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .contract-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1200px) {
+  .contract-card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.contract-card {
+  background-color: var(--color-surface);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s;
+}
+
+.contract-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.cc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 12px;
+}
+
+.cc-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 4px;
+}
+
+.cc-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-sub);
+}
+
+.cc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.cc-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cc-label {
+  color: var(--color-text-sub);
+}
+
+.cc-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

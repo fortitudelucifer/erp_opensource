@@ -1,0 +1,99 @@
+{#
+  base.html - 基础布局模板 / Base Layout Template
+  
+  本文件是所有页面的父模板，定义了整体页面结构：
+  This file is the parent template for all pages, defining the overall page structure:
+  
+  Structure / 结构:
+  - <head>: 元信息、CSS 样式引入 / Meta info, CSS imports
+  - <nav>: 顶部导航栏 / Top navigation bar
+  - <main>: 主内容区域 (通过 block content 填充) / Main content area (filled via block content)
+  - <footer>: 页脚版权信息 / Footer copyright info
+  
+  Blocks / 可覆盖区块:
+  - {% block title %}: 页面标题 / Page title
+  - {% block content %}: 主体内容 / Main content
+  
+  Dependencies / 依赖:
+  - theme.css: 主题变量和基础样式 / Theme variables and base styles
+  - components.css: 组件样式 / Component styles
+  - main.js: 交互脚本 / Interactive scripts
+#}
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}FSZN 合同管理系统{% endblock %}</title>
+    {# CSS 样式引入 / CSS imports #}
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/theme.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/components.css') }}"
+    />
+  </head>
+<body>
+    {# 顶部导航栏：玻璃拟态效果，固定在页面顶部 / Top navbar: glassmorphism effect, sticky at top #}
+    <nav class="glass-panel" style="position: sticky; top: 0; z-index: 1000; margin-bottom: 24px;">
+        <div class="responsive-container" style="display: flex; height: 64px; align-items: center; justify-content: space-between;">
+            {# Logo 和品牌名 / Logo and brand name #}
+            <a href="{{ url_for('home') }}" style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary); text-decoration: none; letter-spacing: 0.05em;">
+                CORE <span style="color: var(--color-text-main);">ERP</span>
+            </a>
+            
+            {# 移动端菜单按钮 / Mobile menu button #}
+            <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle navigation">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+
+            {# 导航链接：根据登录状态显示不同菜单 / Nav links: show different menus based on login status #}
+            <div id="nav-links" class="nav-links">
+                {% if session.get('user_id') %}
+                {# 已登录：显示业务功能入口 / Logged in: show business function entries #}
+                <a href="{{ url_for('contracts.list_contracts') }}" style="color: var(--color-text-main); text-decoration: none; font-weight: 500; font-size: 0.95rem;">项目/合同</a>
+                <a href="{{ url_for('org.list_departments') }}" style="color: var(--color-text-main); text-decoration: none; font-weight: 500; font-size: 0.95rem;">部门与人员</a>
+                <a href="{{ url_for('logs.list_logs') }}" style="color: var(--color-text-main); text-decoration: none; font-weight: 500; font-size: 0.95rem;">操作日志</a>
+                <a href="{{ url_for('auth.logout') }}" style="color: var(--color-danger); text-decoration: none; font-weight: 500; font-size: 0.95rem;">退出</a>
+                {% else %}
+                {# 未登录：显示登录注册入口 / Not logged in: show login/register entries #}
+                <a href="{{ url_for('auth.login') }}" style="color: var(--color-text-main); text-decoration: none; font-weight: 500; font-size: 0.95rem;">登录</a>
+                <a href="{{ url_for('auth.register') }}" style="color: var(--color-text-main); text-decoration: none; font-weight: 500; font-size: 0.95rem;">注册</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {# 主内容区域 / Main content area #}
+    <main class="responsive-container" style="flex: 1">
+        {# Flash 消息提示：显示操作反馈 / Flash messages: show operation feedback #}
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+            {% for msg in messages %}
+            <div class="status-badge warning" style="padding: 8px 16px; border-radius: 8px; width: fit-content;">{{ msg }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {# 子模板内容注入点 / Child template content injection point #}
+        {% block content %}{% endblock %}
+    </main>
+
+    {# 页脚：显示版权信息 / Footer: display copyright info #}
+    <footer style="text-align: center; padding: 48px 0; color: var(--color-text-sub); font-size: 0.875rem;">
+        &copy; {{ config.COPYRIGHT_TEXT }}
+    </footer>
+
+    {# JavaScript 脚本 / JavaScript scripts #}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+

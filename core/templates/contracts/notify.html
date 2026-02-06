@@ -1,0 +1,106 @@
+{#
+  notify.html - 通知发送页 / Notification Sending Page
+  
+  向相关人员发送项目通知：
+  Send project notifications to relevant people:
+  
+  Features / 功能:
+  - 事件类型选择 / Event type selection
+  - 通知通道选择 (钉钉/企业微信/邮件/手机) / Channel selection
+  - 接收用户选择或手动填写 / Recipient selection
+  - 自定义通知内容 / Custom message content
+  
+  Channels / 通知渠道:
+  - ding: 钉钉群机器人 / DingTalk bot
+  - wechat_corp: 企业微信机器人 / WeCom bot
+  - wechat: 个人微信 / Personal WeChat
+  - sms: 手机短信 / SMS
+  - email: 电子邮件 / Email
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - contract: 合同对象 / Contract object
+  - users: 系统用户列表 / System users
+  - notification_event_choices: 事件类型选项 / Event options
+  - default_*: 默认值 / Default values
+#}
+{% extends 'base.html' %}
+
+
+
+{% block title %}发送通知 - {{ contract.project_code }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+    {# 项目头部 / Project header #}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <div style="font-size: 0.9rem; color: var(--color-text-sub);">项目编号: <span style="color: var(--color-primary); font-family: monospace;">{{ contract.project_code }}</span></div>
+            <h2 style="margin: 4px 0 0 0; font-size: 1.5rem; font-weight: 700;">{{ contract.name }} - 发送通知</h2>
+        </div>
+        <a href="{{ url_for('contracts.list_contracts') }}" class="btn-industrial" style="background: transparent; border: 1px solid rgba(255,255,255,0.2);">返回列表</a>
+    </div>
+
+    {# 功能标签页 / Tab navigation #}
+    <div style="display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding: 12px 4px 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 5; margin-top: -12px;">
+        <a href="{{ url_for('contracts.contract_overview', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">总览</a>
+        <a href="{{ url_for('contracts.manage_tasks', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">任务/进度</a>
+        <a href="{{ url_for('contracts.manage_sales', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">销售</a>
+        <a href="{{ url_for('contracts.notify_contract', contract_id=contract.id) }}" class="btn-industrial" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">通知</a>
+        <a href="{{ url_for('contracts.manage_leaders', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">负责人</a>
+        <a href="{{ url_for('contracts.manage_procurements', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">采购</a>
+        <a href="{{ url_for('contracts.manage_acceptances', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">验收</a>
+        <a href="{{ url_for('contracts.manage_feedbacks', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">反馈</a>
+        <a href="{{ url_for('contracts.manage_files', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">文件</a>
+    </div>
+
+    {# 通知表单 / Notification form #}
+    <form method="post" action="{{ url_for('contracts.notify_contract', contract_id=contract.id) }}" style="max-width: 600px;">
+        <div class="form-group" style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">事件类型</label>
+            <select name="event_code" class="form-control" style="width: 80%;">
+                {% for code, label in notification_event_choices %}
+                    <option value="{{ code }}" {% if code == default_event_code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <div style="font-size: 0.8rem; color: var(--color-text-sub); margin-top: 4px;">用于标记本次通知属于哪类事件，便于后期在操作日志中筛选。</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">通知通道</label>
+            <select name="channel" class="form-control" style="width: 80%;">
+                <option value="ding" {% if default_channel == 'ding' %}selected{% endif %}>钉钉-群机器人</option>
+                <option value="wechat_corp" {% if default_channel == 'wechat_corp' %}selected{% endif %}>企业微信-机器人</option>
+                <option value="wechat" {% if default_channel == 'wechat' %}selected{% endif %}>个人微信-预留</option>
+                <option value="sms" {% if default_channel == 'sms' %}selected{% endif %}>手机</option>
+                <option value="email" {% if default_channel == 'email' %}selected{% endif %}>邮件</option>
+            </select>
+            <div style="font-size: 0.8rem; color: var(--color-text-sub); margin-top: 4px;">钉钉/企业微信会发送到群机器人；邮件/手机/微信则根据用户或填写的接收人发送。</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">接收用户 (系统内已注册，可选)</label>
+            <select name="target_user_id" class="form-control" style="width: 80%;">
+                <option value="">-- 可不选 --</option>
+                {% for u in users %}
+                    <option value="{{ u.id }}">{{ u.username }} ({{ u.email or '-' }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">接收人 (邮箱/手机/微信ID)</label>
+            <input type="text" name="target" value="{{ default_target or '' }}" class="form-control" style="width: 80%; box-sizing: border-box;" placeholder="如未选择系统用户，可在此手动填写">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 24px;">
+            <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">通知内容</label>
+            <textarea name="message" class="form-control" rows="5" style="width: 100%; box-sizing: border-box;">{{ default_message or '' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn-industrial">发送通知</button>
+    </form>
+</div>
+{% endblock %}

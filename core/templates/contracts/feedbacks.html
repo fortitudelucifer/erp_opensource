@@ -1,0 +1,158 @@
+{#
+  feedbacks.html - 客户反馈管理 / Customer Feedback Management
+  
+  管理客户反馈和问题追踪：
+  Manage customer feedback and issue tracking:
+  
+  Features / 功能:
+  - 反馈列表 (内容、处理人、结果、状态) / Feedback list
+  - 状态切换 (已解决/重开) / Status toggle
+  - 新增反馈表单 / Add feedback form
+  - 跳转售后问题看板 / Link to after-sales dashboard
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - contract: 合同对象 / Contract object
+  - records: 反馈记录列表 / Feedback records
+  - persons: 处理人列表 / Handler list
+#}
+{% extends 'base.html' %}
+
+{% block title %}客户反馈 - {{ contract.project_code }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+    {# 项目头部 / Project header #}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <div style="font-size: 0.9rem; color: var(--color-text-sub);">项目编号: <span style="color: var(--color-primary); font-family: monospace;">{{ contract.project_code }}</span></div>
+            <h2 style="margin: 4px 0 0 0; font-size: 1.5rem; font-weight: 700;">{{ contract.name }} - 客户反馈</h2>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <a href="{{ url_for('contracts.feedbacks_overview') }}" target="_blank" class="btn-industrial" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); font-size: 0.85rem;">售后问题看板</a>
+            <a href="{{ url_for('contracts.list_contracts') }}" class="btn-industrial" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); font-size: 0.85rem;">返回列表</a>
+        </div>
+    </div>
+
+    {# 功能标签页 / Tab navigation #}
+    <div style="display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding: 12px 4px 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 5; margin-top: -12px;">
+        <a href="{{ url_for('contracts.contract_overview', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">总览</a>
+        <a href="{{ url_for('contracts.manage_tasks', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">任务/进度</a>
+        <a href="{{ url_for('contracts.manage_sales', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">销售</a>
+        <a href="{{ url_for('contracts.notify_contract', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">通知</a>
+        <a href="{{ url_for('contracts.manage_leaders', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">负责人</a>
+        <a href="{{ url_for('contracts.manage_procurements', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">采购</a>
+        <a href="{{ url_for('contracts.manage_acceptances', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">验收</a>
+        <a href="{{ url_for('contracts.manage_feedbacks', contract_id=contract.id) }}" class="btn-industrial" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">反馈</a>
+        <a href="{{ url_for('contracts.manage_files', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">文件</a>
+    </div>
+
+    {# 双栏布局 / Two-column layout #}
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;">
+        {# 左栏：反馈列表 / Left: feedback list #}
+        <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">反馈列表</h3>
+                <div style="font-size: 0.85rem; color: var(--color-text-sub);">共 {{ records|length }} 项</div>
+            </div>
+
+            {% if records %}
+            <div class="table-container">
+                <table class="ind-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">反馈内容</th>
+                            <th style="width: 15%;">处理人</th>
+                            <th style="width: 20%;">处理结果</th>
+                            <th style="width: 10%;">状态</th>
+                            <th style="width: 15%;">时间</th>
+                            <th style="width: 15%; text-align: right;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in records %}
+                        <tr>
+                            <td>
+                                <div style="font-size: 0.9rem;">{{ r.content }}</div>
+                            </td>
+                            <td>{{ r.handler.name if r.handler else '-' }}</td>
+                            <td style="font-size: 0.85rem; color: var(--color-text-sub);">{{ r.result or '-' }}</td>
+                            <td>
+                                {% if r.is_resolved %}
+                                <span class="status-badge success">已解决</span>
+                                {% else %}
+                                <span class="status-badge danger">未解决</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="font-size: 0.8rem; color: var(--color-text-sub);">
+                                    反馈: {{ r.feedback_time.strftime('%Y-%m-%d') if r.feedback_time else '-' }}<br>
+                                    完成: {{ r.completion_time.strftime('%Y-%m-%d') if r.completion_time else '-' }}
+                                </div>
+                            </td>
+                            <td style="text-align: center;">
+                                <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                    {% if r.is_resolved %}
+                                    <form method="post" action="{{ url_for('contracts.unresolve_feedback', contract_id=contract.id, feedback_id=r.id) }}" style="display:inline; margin:0;">
+                                        <button type="submit" class="btn-text" style="color: var(--color-warning); background: transparent; border: none; cursor: pointer; font-size: 0.85rem; white-space: nowrap;">重开</button>
+                                    </form>
+                                    {% else %}
+                                    <form method="post" action="{{ url_for('contracts.resolve_feedback', contract_id=contract.id, feedback_id=r.id) }}" style="display:inline; margin:0;">
+                                        <button type="submit" class="btn-text" style="color: var(--color-accent); background: transparent; border: none; cursor: pointer; font-size: 0.85rem; white-space: nowrap;">解决</button>
+                                    </form>
+                                    {% endif %}
+                                    
+                                    <form method="post" action="{{ url_for('contracts.delete_feedback', contract_id=contract.id, feedback_id=r.id) }}" style="display:inline; margin:0;">
+                                        <button type="submit" onclick="return confirm('确认删除该反馈？');" class="btn-text" style="color: var(--color-danger); background: transparent; border: none; cursor: pointer; font-size: 0.85rem; white-space: nowrap;">删除</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 48px; color: var(--color-text-sub); border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">
+                暂无反馈记录，请在右侧添加。
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Add Form -->
+        <div class="glass-panel" style="width: 350px; max-width: 100%; flex-shrink: 0; padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); height: fit-content;">
+            <h3 style="margin: 0 0 16px 0;">新增反馈</h3>
+            <form method="post">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">反馈内容 <span style="color: var(--color-danger);">*</span></label>
+                    <textarea name="content" class="form-control" style="width: 100%; box-sizing: border-box;" rows="4" required></textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">处理人 (可选)</label>
+                    <select name="handler_id" class="form-control" style="width: 100%;">
+                        <option value="">可不选</option>
+                        {% for p in persons %}
+                        <option value="{{ p.id }}">{{ p.name }} - {{ p.position }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">处理结果 (可选)</label>
+                    <textarea name="result" class="form-control" style="width: 100%; box-sizing: border-box;" rows="3"></textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">处理完成日期 (可选)</label>
+                    <input type="date" name="completion_date" class="form-control" style="width: 100%; box-sizing: border-box;">
+                </div>
+
+                <button type="submit" class="btn-industrial" style="width: 100%;">保存反馈记录</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

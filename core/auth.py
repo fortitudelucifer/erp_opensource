@@ -1,0 +1,156 @@
+# -*- coding: utf-8 -*-
+"""
+auth.py - 用户认证与鉴权模块 / User Authentication & Authorization Module
+
+本模块处理用户的登录、注册、注销逻辑，以及权限装饰器：
+This module handles user login, registration, logout logic, and permission decorators:
+
+- login_required: 登录检查装饰器 / Login check decorator
+- staff_required: 内部员工权限装饰器 / Internal staff permission decorator
+- register: 用户注册 / User registration
+- login: 用户登录 / User login
+- logout: 用户注销 / User logout
+
+Author: fortitudelucifer (https://github.com/fortitudelucifer)
+License: Apache-2.0
+"""
+
+from functools import wraps
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, abort
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from .models import User
+from . import db
+
+auth_bp = Blueprint('auth', __name__)
+
+
+def login_required(view):
+    """
+    登录检查装饰器 / Login check decorator
+    
+    确保用户已登录后才能访问被装饰的视图函数。
+    Ensures user is logged in before accessing the decorated view function.
+    
+    Args:
+        view: 被装饰的视图函数 / The view function to be decorated
+        
+    Returns:
+        wrapped_view: 包装后的视图函数 / The wrapped view function
+    """
+    @wraps(view)
+    def wrapped_view(**kwargs):
+        if 'user_id' not in session:
+            flash('请先登录')
+            return redirect(url_for('auth.login'))
+        return view(**kwargs)
+    return wrapped_view
+
+
+# 允许访问内部管理页面的角色（内部员工）
+INTERNAL_ROLES = {
+    'admin',
+    'boss',
+    'software_engineer',
+    'electrical_engineer',
+    'mechanical_engineer',
+    'sales',
+    'service',
+    'procurements',
+    # 'finance',
+}
+
+def staff_required(view):
+    """只允许内部员工访问的装饰器（客户 customer 会被拒绝）"""
+    @wraps(view)
+    def wrapped_view(**kwargs):
+        user_id = session.get('user_id')
+        if not user_id:
+            flash('请先登录')
+            return redirect(url_for('auth.login'))
+
+        user = User.query.get(user_id)
+        if not user or user.role not in INTERNAL_ROLES:
+            # 这里直接 403，后面可以再自定义提示页
+            abort(403)
+
+        return view(**kwargs)
+    return wrapped_view
+
+
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = (request.form.get('username') or '').strip()
+        real_name=(request.form.get('real_name') or '').strip()
+        email = (request.form.get('email') or '').strip()
+
+        # 新增：可选手机号和微信号
+        phone = (request.form.get('phone') or '').strip()
+        wechat = (request.form.get('wechat') or '').strip()
+
+        password = request.form.get('password')
+        confirm = request.form.get('confirm')
+
+        if not username or not email or not password or not real_name:
+            flash('请填写所有必填项')
+            return render_template('auth/register.html')
+
+        if password != confirm:
+            flash('两次输入的密码不一致')
+            return render_template('auth/register.html')
+
+        # 检查是否已存在
+        exists = User.query.filter(
+            (User.username == username) | (User.email == email)
+        ).first()
+        if exists:
+            flash('用户名或邮箱已被占用')
+            return render_template('auth/register.html')
+
+        # 创建用户，密码用哈希保存
+        user = User(
+            username=username,
+            real_name=real_name,
+            email=email,
+            phone=phone, # or None     若为空字符串则存 None
+            wechat=wechat, # or None   若为空字符串则存 None
+            password_hash=generate_password_hash(password),
+            role = 'customer'
+        )
+        db.session.add(user)
+        db.session.commit()
+
+        flash('注册成功，请登录')
+        return redirect(url_for('auth.login'))
+
+    return render_template('auth/register.html')
+
+
+@auth_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        name_or_email = (request.form.get('username') or '').strip()
+        password = request.form.get('password')
+
+        user = User.query.filter(
+            (User.username == name_or_email) | (User.email == name_or_email)
+        ).first()
+
+        if user and check_password_hash(user.password_hash, password):
+            session['user_id'] = user.id
+            flash('登录成功')
+            return redirect(url_for('home'))
+
+        flash('用户名/邮箱或密码错误')
+
+    return render_template('auth/login.html')
+
+
+@auth_bp.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('已退出登录')
+    return redirect(url_for('auth.login'))

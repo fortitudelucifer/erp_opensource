@@ -1,0 +1,205 @@
+{#
+  home.html - 首页仪表盘 / Home Dashboard
+  
+  系统首页，展示关键业务指标和操作入口：
+  System homepage displaying key business metrics and action entries:
+  
+  Sections / 功能区块:
+  - KPI Cards: 合同总数、进行中、预警、本月交付 / Total contracts, active, warnings, monthly delivery
+  - 项目交付趋势图表 / Project delivery trend chart (ECharts)
+  - 部门负载分布图表 / Department load distribution chart (ECharts)
+  - 最近操作日志 / Recent operation logs
+  - 快捷入口 / Quick action buttons
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  - ECharts CDN (图表库 / Chart library)
+  
+  Variables / 传入变量:
+  - user: 当前登录用户 / Current logged-in user
+  - config.COMPANY_NAME: 公司名称 / Company name
+#}
+{% extends 'base.html' %}
+
+{% block title %}仪表盘 - {{ config.COMPANY_NAME }}{% endblock %}
+
+{% block content %}
+{# 页面标题和欢迎信息 / Page title and welcome message #}
+<div style="margin-bottom: 24px;">
+    <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">
+        {% if user %}欢迎回来, {{ user.username }}{% else %}概览{% endif %}
+    </h1>
+    <p style="color: var(--color-text-sub);">系统运行状态正常 · 所有服务在线</p>
+</div>
+
+{# Bento Grid 布局：现代化的仪表盘网格布局 / Bento Grid layout: modern dashboard grid layout #}
+<div class="bento-grid">
+    {# KPI 卡片区域：显示核心业务指标 / KPI Cards: display core business metrics #}
+    <div class="bento-item card">
+        <div style="color: var(--color-text-sub); font-size: 0.875rem; margin-bottom: 8px;">合同总数 (Total)</div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">124</div>
+        <div class="status-badge success" style="margin-top: auto; width: fit-content;">+12% 本月</div>
+    </div>
+    
+    <div class="bento-item card">
+        <div style="color: var(--color-text-sub); font-size: 0.875rem; margin-bottom: 8px;">进行中 (Active)</div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--color-accent);">45</div>
+        <div style="font-size: 0.875rem; color: var(--color-text-sub); margin-top: auto;">3 个即将交付</div>
+    </div>
+
+    <div class="bento-item card">
+        <div style="color: var(--color-text-sub); font-size: 0.875rem; margin-bottom: 8px;">预警项目 (Warning)</div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--color-warning);">2</div>
+        <div class="status-badge warning" style="margin-top: auto; width: fit-content;">需立即处理</div>
+    </div>
+
+    <div class="bento-item card">
+        <div style="color: var(--color-text-sub); font-size: 0.875rem; margin-bottom: 8px;">本月交付 (Delivery)</div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--color-text-main);">8</div>
+        <div style="font-size: 0.875rem; color: var(--color-text-sub); margin-top: auto;">达成率 92%</div>
+    </div>
+
+    {# 项目交付趋势图表：跨2列显示 / Project delivery trend chart: spans 2 columns #}
+    <div class="bento-item card col-span-2" style="min-height: 300px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0; font-size: 1.1rem;">项目交付趋势</h3>
+            <div style="display: flex; gap: 8px;">
+                <span class="status-badge">近6个月</span>
+            </div>
+        </div>
+        {# ECharts 图表容器 / ECharts container #}
+        <div id="chart-delivery-trend" style="flex: 1; background: rgba(255,255,255,0.02); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--color-text-sub);">
+            [图表区域：等待 ECharts 集成]
+        </div>
+    </div>
+
+    {# 部门负载分布图表：跨2列显示 / Department load chart: spans 2 columns #}
+    <div class="bento-item card col-span-2" style="min-height: 300px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0; font-size: 1.1rem;">部门负载分布</h3>
+        </div>
+        {# ECharts 饼图容器 / ECharts pie chart container #}
+        <div id="chart-dept-load" style="flex: 1; background: rgba(255,255,255,0.02); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--color-text-sub);">
+            [图表区域：等待 ECharts 集成]
+        </div>
+    </div>
+
+    {# 最近操作日志：显示最新的系统操作记录 / Recent activity logs: show latest system operations #}
+    <div class="bento-item card col-span-2" style="min-height: 200px;">
+         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0; font-size: 1.1rem;">最近操作日志</h3>
+            <a href="{{ url_for('logs.list_logs') }}" style="color: var(--color-primary); text-decoration: none; font-size: 0.875rem;">查看全部</a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            {# 示例日志条目 / Sample log entries #}
+            <div style="display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <div>
+                    <span style="color: var(--color-text-main);">系统管理员</span>
+                    <span style="color: var(--color-text-sub);">更新了合同状态</span>
+                </div>
+                <div style="color: var(--color-text-sub); font-size: 0.875rem;">10分钟前</div>
+            </div>
+             <div style="display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 0;">
+                <div>
+                    <span style="color: var(--color-text-main);">合同专员</span>
+                    <span style="color: var(--color-text-sub);">上传了附件</span>
+                </div>
+                <div style="color: var(--color-text-sub); font-size: 0.875rem;">1小时前</div>
+            </div>
+        </div>
+    </div>
+
+    {# 快捷入口：常用功能的快速访问按钮 / Quick actions: quick access buttons for common functions #}
+    <div class="bento-item card col-span-2">
+         <h3 style="margin: 0 0 16px 0; font-size: 1.1rem;">快捷入口</h3>
+         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+             <a href="{{ url_for('contracts.new_contract') }}" class="btn-industrial" style="text-align: center;">新建合同</a>
+             <a href="{{ url_for('contracts.list_contracts') }}" class="btn-industrial" style="background-color: var(--color-surface); border: 1px solid var(--color-primary); color: var(--color-primary); text-align: center;">所有项目</a>
+         </div>
+    </div>
+</div>
+
+{# ECharts CDN 引入和图表初始化脚本 / ECharts CDN import and chart initialization scripts #}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- 1. 项目交付趋势图表 / Project Delivery Trend Chart ---
+        var chartDom1 = document.getElementById('chart-delivery-trend');
+        chartDom1.innerHTML = ''; // 清除占位文本 / Clear placeholder
+        var myChart1 = echarts.init(chartDom1, 'dark', { renderer: 'svg', backgroundColor: 'transparent' });
+        var option1 = {
+            backgroundColor: 'transparent',
+            grid: { top: 30, right: 20, bottom: 20, left: 40, containLabel: true },
+            tooltip: { trigger: 'axis' },
+            xAxis: {
+                type: 'category',
+                data: ['8月', '9月', '10月', '11月', '12月', '1月'],
+                axisLine: { lineStyle: { color: '#475569' } },
+                axisLabel: { color: '#94a3b8' }
+            },
+            yAxis: {
+                type: 'value',
+                splitLine: { lineStyle: { color: '#334155', type: 'dashed' } },
+                axisLabel: { color: '#94a3b8' }
+            },
+            series: [{
+                data: [4, 6, 3, 8, 12, 8],
+                type: 'line',
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 8,
+                itemStyle: { color: '#2563eb' },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(37, 99, 235, 0.5)' },
+                        { offset: 1, color: 'rgba(37, 99, 235, 0.0)' }
+                    ])
+                }
+            }]
+        };
+        myChart1.setOption(option1);
+
+        // --- 2. 部门负载分布图表 / Department Load Chart ---
+        var chartDom2 = document.getElementById('chart-dept-load');
+        chartDom2.innerHTML = ''; // 清除占位文本 / Clear placeholder
+        var myChart2 = echarts.init(chartDom2, 'dark', { renderer: 'svg', backgroundColor: 'transparent' });
+        var option2 = {
+            backgroundColor: 'transparent',
+            tooltip: { trigger: 'item' },
+            legend: { top: '5%', left: 'center', textStyle: { color: '#94a3b8' } },
+            series: [
+                {
+                    name: '任务负载',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 5,
+                        borderColor: '#1e293b',
+                        borderWidth: 2
+                    },
+                    label: { show: false, position: 'center' },
+                    emphasis: {
+                        label: { show: true, fontSize: 16, fontWeight: 'bold', color: '#fff' }
+                    },
+                    labelLine: { show: false },
+                    data: [
+                        { value: 35, name: '机械设计', itemStyle: { color: '#3b82f6' } },
+                        { value: 28, name: '电气设计', itemStyle: { color: '#10b981' } },
+                        { value: 22, name: '软件开发', itemStyle: { color: '#f59e0b' } },
+                        { value: 15, name: '装配调试', itemStyle: { color: '#ef4444' } }
+                    ]
+                }
+            ]
+        };
+        myChart2.setOption(option2);
+
+        // 响应式处理：窗口大小变化时重绘图表 / Responsive: resize charts when window size changes
+        window.addEventListener('resize', function() {
+            myChart1.resize();
+            myChart2.resize();
+        });
+    });
+</script>
+{% endblock %}
+

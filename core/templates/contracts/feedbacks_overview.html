@@ -1,0 +1,129 @@
+{#
+  feedbacks_overview.html - 售后问题看板 / After-sales Feedback Dashboard
+  
+  汇总所有项目的未解决反馈：
+  Summary of unresolved feedbacks from all projects:
+  
+  Features / 功能:
+  - 跨项目汇总未解决反馈 / Cross-project feedback aggregation
+  - 按公司/项目编号/处理人筛选 / Filter by company/code/handler
+  - 快速跳转到具体项目处理 / Quick link to project page
+  - 待处理数量统计 / Pending count display
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - feedbacks: 未解决反馈列表 / Unresolved feedbacks
+  - persons: 处理人列表 / Handler list
+  - company_filter: 公司筛选 / Company filter
+  - project_code_filter: 项目编号筛选 / Project code filter
+  - handler_filter: 处理人筛选 / Handler filter
+#}
+{% extends 'base.html' %}
+
+{% block title %}售后问题看板{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700;">售后问题看板 <span style="font-size: 0.9rem; font-weight: 400; color: var(--color-text-sub);">| 未解决反馈</span></h2>
+        <div style="background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">
+            <span style="color: var(--color-text-sub); font-size: 0.85rem;">待处理:</span>
+            <span style="color: var(--color-danger); font-weight: bold; font-size: 1.1rem; margin-left: 4px;">{{ feedbacks|length }}</span>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="get" class="glass-panel" style="padding: 16px; border-radius: 8px; box-shadow: none; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); margin-bottom: 24px;">
+        <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 150px;">
+                <label style="display: block; font-size: 0.8rem; color: var(--color-text-sub); margin-bottom: 4px;">客户公司</label>
+                <input type="text" name="company" class="form-control" style="width: 100%; box-sizing: border-box;" value="{{ company_filter or '' }}" placeholder="关键字...">
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label style="display: block; font-size: 0.8rem; color: var(--color-text-sub); margin-bottom: 4px;">项目编号</label>
+                <input type="text" name="project_code" class="form-control" style="width: 100%; box-sizing: border-box;" value="{{ project_code_filter or '' }}" placeholder="关键字...">
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label style="display: block; font-size: 0.8rem; color: var(--color-text-sub); margin-bottom: 4px;">处理人</label>
+                <select name="handler_id" class="form-control" style="width: 100%;">
+                    <option value="">全部</option>
+                    {% for p in persons %}
+                    <option value="{{ p.id }}" {% if handler_filter and handler_filter|int==p.id %}selected{% endif %}>
+                        {{ p.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" class="btn-industrial" style="padding: 8px 16px; font-size: 0.9rem;">筛选</button>
+                <a href="{{ url_for('contracts.feedbacks_overview') }}" class="btn-industrial" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; font-size: 0.9rem;">清空</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="table-container">
+        <table class="ind-table">
+            <thead>
+                <tr>
+                    <th style="width: 30%;">项目信息</th>
+                    <th style="width: 40%;">反馈内容</th>
+                    <th style="width: 10%;">反馈信息</th>
+                    <th style="width: 10%;">状态</th>
+                    <th style="width: 10%; text-align: right;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if feedbacks %}
+                {% for fb in feedbacks %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 600; color: var(--color-primary); margin-bottom: 2px;">{{ fb.contract.project_code if fb.contract else '-' }}</div>
+                        <div style="font-size: 0.9rem;">{{ fb.contract.name if fb.contract else '-' }}</div>
+                        <div style="font-size: 0.8rem; color: var(--color-text-sub); margin-top: 2px;">
+                            {{ fb.contract.company.name if fb.contract and fb.contract.company else '-' }}
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.9rem; margin-bottom: 4px;">{{ fb.content }}</div>
+                        {% if fb.result %}
+                        <div style="font-size: 0.8rem; color: var(--color-text-sub); background: rgba(255,255,255,0.05); padding: 4px; border-radius: 4px;">
+                            <span style="opacity: 0.7;">处理:</span> {{ fb.result }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-size: 0.8rem; color: var(--color-text-sub);">
+                            {% if fb.feedback_time %}{{ fb.feedback_time.strftime('%Y-%m-%d') }}{% endif %}<br>
+                            {% if fb.handler %}<span style="color: var(--color-text-main);">{{ fb.handler.name }}</span>{% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        {% if fb.is_resolved %}
+                        <span class="status-badge success">已解决</span>
+                        {% else %}
+                        <span class="status-badge danger">未解决</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        {% if fb.contract %}
+                        <a href="{{ url_for('contracts.manage_feedbacks', contract_id=fb.contract.id) }}" class="btn-text" style="color: var(--color-primary); text-decoration: none; font-size: 0.9rem;">
+                            处理
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 48px; color: var(--color-text-sub);">
+                        暂无未解决的反馈记录。
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

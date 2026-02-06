@@ -1,0 +1,82 @@
+{#
+  persons.html - 人员列表页 / Personnel List Page
+  
+  组织架构中的人员管理：
+  Personnel management in organization:
+  
+  Features / 功能:
+  - 人员列表 (ID、姓名、部门、职位、手机) / Personnel list
+  - 新增人员入口 / Add person link
+  - 编辑/删除人员 / Edit/delete person
+  - 关联用户手机号显示 / User phone mapping
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - persons: 人员列表 / Person list
+  - user_phone_map: 姓名→手机号映射 / Name to phone mapping
+#}
+{% extends 'base.html' %} 
+
+{% block title %}人员管理 - {{ config.COMPANY_NAME }}{% endblock %} 
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700;">人员列表</h2>
+        <div>
+            <a href="{{ url_for('org.new_person') }}" class="btn-industrial">+ 新增人员</a>
+            <a href="{{ url_for('org.list_departments') }}" class="btn-industrial" style="background-color: transparent; border: 1px solid rgba(255,255,255,0.2); margin-left: 12px;">返回部门</a>
+        </div>
+    </div>
+
+    {% if persons %}
+    <div class="table-container">
+        <table class="ind-table">
+            <thead>
+                <tr>
+                    <th style="width: 10%;">ID</th>
+                    <th style="width: 15%;">姓名</th>
+                    <th style="width: 15%;">部门</th>
+                    <th style="width: 20%;">职位</th>
+                    <th style="width: 20%;">手机号</th>
+                    <th style="width: 20%; text-align: right;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in persons %}
+                <tr>
+                    <td>{{ p.id }}</td>
+                    <td style="font-weight: 500;">{{ p.name }}</td>
+                    <td>
+                        {% if p.department %}
+                        <span class="status-badge">{{ p.department.name }}</span>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>{{ p.position }}</td>
+                    <td style="font-family: monospace;">{{ user_phone_map.get(p.name, '-') }}</td>
+                    <td style="text-align: center;">
+                        <a href="{{ url_for('org.edit_person', person_id=p.id) }}">编辑</a>
+                        
+                        <form method="post" action="{{ url_for('org.delete_person', person_id=p.id) }}" style="display:inline; margin:0;">
+                             <button type="submit" onclick="return confirm('确认删除该人员？');" 
+                                style="background: transparent; border: none; color: var(--color-danger); cursor: pointer; opacity: 0.8; transition: opacity 0.2s;">
+                                删除
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 48px; color: var(--color-text-sub); border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">
+        当前还没有人员，请点击右上角新增。
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

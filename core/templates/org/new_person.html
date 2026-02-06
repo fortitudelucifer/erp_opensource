@@ -1,0 +1,52 @@
+{#
+  new_person.html - 新增人员页 / Add Person Page
+  
+  创建新的组织成员：
+  Create new organization member:
+  
+  Features / 功能:
+  - 人员基本信息录入 / Basic info entry
+  - 所属部门选择 / Department selection
+  - 职位设置 / Position setting
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - departments: 部门列表 / Department list
+#}
+{% extends 'base.html' %}
+
+{% block title %}新增人员{% endblock %}
+
+{% block content %}
+<h1>新增人员</h1>
+
+<p>
+    <a href="{{ url_for('org.list_persons') }}">返回人员列表</a>
+</p>
+
+<form method="post">
+    <p>
+        姓名：
+        <input type="text" name="name">
+    </p>
+    <p>
+        部门：
+        <select name="department_id">
+            <option value="">-- 请选择部门 --</option>
+            {% for d in departments %}
+            <option value="{{ d.id }}">{{ d.name }}</option>
+            {% endfor %}
+        </select>
+    </p>
+    <p>
+        职位（例如：工程师 / 采购 / 销售）：
+        <input type="text" name="position">
+    </p>
+    <p>
+        <button type="submit">创建</button>
+        <a href="{{ url_for('org.list_persons') }}">取消</a>
+    </p>
+</form>
+{% endblock %}

@@ -1,0 +1,43 @@
+:root {
+  /* 配色方案 (Color Palette) */
+  --color-bg-deep: #0f172a; /* Deep Void: 全局主背景 */
+  --color-surface: #1e293b; /* Carbon Sheet: 卡片背景 */
+  --color-primary: #3b82f6; /* Cyber Blue: 主操作色 */
+  --color-accent: #10b981; /* Tech Green: 成功/运行状态 */
+  --color-warning: #f59e0b; /* Energy Orange: 警告/待检 */
+  --color-danger: #ef4444; /* Reactor Red: 错误/停机 */
+  --color-text-main: #f8fafc; /* Titanium White: 主要文本 */
+  --color-text-sub: #94a3b8; /* Steel Grey: 次要文本 */
+
+  /* 布局与效果变量 */
+  --spacing-unit: 8px;
+  --border-radius-card: 12px;
+  --glass-blur: 12px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-bg-deep);
+  color: var(--color-text-main);
+  color-scheme: dark; /* 强制浏览器原生深色 UI */
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

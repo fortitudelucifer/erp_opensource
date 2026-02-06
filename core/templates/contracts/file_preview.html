@@ -1,0 +1,175 @@
+{#
+  file_preview.html - 文件预览页 / File Preview Page
+  
+  在浏览器中预览项目文件：
+  Preview project files in browser:
+  
+  Features / 功能:
+  - PDF 文件内嵌预览 / PDF embedded preview
+  - 图片放大缩小拖拽查看 / Image zoom/pan viewer
+  - Office 文档 PDF 转换预览 / Office to PDF preview
+  - 不支持格式的下载提示 / Download prompt for unsupported
+  
+  Supported Formats / 支持格式:
+  - PDF: 直接嵌入 iframe
+  - 图片: 交互式查看器 (zoom/pan)
+  - Office: 转换为 PDF 预览
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - contract: 合同对象 / Contract object
+  - file: 文件对象 / File object
+  - is_pdf, is_image, is_office: 类型标志 / Type flags
+  - raw_url: 原始文件 URL / Raw file URL
+  - preview_pdf_url: PDF 预览 URL / PDF preview URL
+  - human_filesize: 文件大小格式化函数 / Size formatter
+#}
+{% extends 'base.html' %}
+
+{% block title %}预览文件 - {{ file.original_filename or file.stored_filename }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+    {# 页面头部 / Page header #}
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+        <div>
+            <div style="font-size: 0.9rem; color: var(--color-text-sub);">
+                {{ contract.project_code }} · {{ contract.name }}
+            </div>
+            <h2 style="margin: 4px 0 0 0; font-size: 1.5rem; font-weight: 700;">{{ file.original_filename }}</h2>
+            <div style="margin-top: 8px; display: flex; gap: 16px; font-size: 0.85rem; color: var(--color-text-sub);">
+                <span>类型: 
+                    {% if file.file_type == 'contract' %}合同
+                    {% elif file.file_type == 'tech' %}技术文档
+                    {% elif file.file_type == 'drawing' %}图纸
+                    {% else %}其它{% endif %}
+                </span>
+                <span>版本: {{ file.version }}</span>
+                <span>大小: {{ human_filesize(file.file_size) }}</span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+            <a href="{{ url_for('contracts.manage_files', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: 1px solid rgba(255,255,255,0.2);">返回列表</a>
+            <a href="{{ url_for('contracts.download_file', contract_id=contract.id, file_id=file.id) }}" class="btn-industrial">下载文件</a>
+        </div>
+    </div>
+
+    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px;">
+        {# ===== PDF 预览 ===== #}
+        {% if is_pdf %}
+            <div style="background: #2d3748; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                <iframe src="{{ raw_url }}" style="width:100%; height:80vh; border:none;"></iframe>
+            </div>
+
+        {# ===== 图片预览（带放大/缩小/平移） ===== #}
+        {% elif is_image %}
+            <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 8px;">
+                    <i class="fas fa-search"></i> 鼠标滚轮缩放，按住左键拖动查看细节
+                </div>
+                <div id="imgPreviewWrapper">
+                    <img id="previewImage" src="{{ raw_url }}" alt="预览图片">
+                </div>
+            </div>
+
+            <style>
+                #imgPreviewWrapper {
+                    width: 100%;
+                    height: 75vh;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    overflow: hidden;
+                    position: relative;
+                    background: #0f172a;
+                    border-radius: 4px;
+                    cursor: grab;
+                }
+                #imgPreviewWrapper.dragging {
+                    cursor: grabbing;
+                }
+                #previewImage {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform-origin: center center;
+                    max-width: none;
+                }
+            </style>
+
+            <script>
+                (function () {
+                    const wrapper = document.getElementById('imgPreviewWrapper');
+                    const img = document.getElementById('previewImage');
+                    let scale = 1;
+                    let posX = 0;
+                    let posY = 0;
+                    let isDragging = false;
+                    let startX = 0;
+                    let startY = 0;
+
+                    function updateTransform() {
+                        img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale}) translate(-50%, -50%)`;
+                    }
+
+                    window.addEventListener('load', function () {
+                        updateTransform();
+                    });
+
+                    wrapper.addEventListener('wheel', function (e) {
+                        e.preventDefault();
+                        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                        let newScale = scale + delta;
+                        if (newScale < 0.1) newScale = 0.1;
+                        if (newScale > 10) newScale = 10;
+                        scale = newScale;
+                        updateTransform();
+                    }, { passive: false });
+
+                    wrapper.addEventListener('mousedown', function (e) {
+                        e.preventDefault();
+                        isDragging = true;
+                        wrapper.classList.add('dragging');
+                        startX = e.clientX - posX;
+                        startY = e.clientY - posY;
+                    });
+
+                    document.addEventListener('mousemove', function (e) {
+                        if (!isDragging) return;
+                        posX = e.clientX - startX;
+                        posY = e.clientY - startY;
+                        updateTransform();
+                    });
+
+                    document.addEventListener('mouseup', function () {
+                        isDragging = false;
+                        wrapper.classList.remove('dragging');
+                    });
+                })();
+            </script>
+
+        {# ===== Office / CAD / 其它 ===== #}
+        {% elif is_office and preview_pdf_url %}
+            <div style="background: #2d3748; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                 <div style="padding: 8px 16px; background: rgba(0,0,0,0.2); font-size: 0.85rem; color: var(--color-text-sub);">Office 文档预览 (PDF 转换)</div>
+                <iframe src="{{ preview_pdf_url }}" style="width:100%; height:80vh; border:none;"></iframe>
+            </div>
+
+        {% else %}
+            <div style="text-align: center; padding: 64px 24px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);">
+                <div style="font-size: 3rem; color: var(--color-text-sub); margin-bottom: 24px;">
+                    <i class="far fa-file"></i>
+                </div>
+                <h3 style="margin: 0 0 8px 0; color: var(--color-text-main);">无法在线预览此格式</h3>
+                <p style="color: var(--color-text-sub); margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    当前文件格式 ({{ file.original_filename.split('.')[-1] if '.' in file.original_filename else 'unknown' }}) 不支持直接在浏览器中查看。<br>
+                    请下载文件后使用本地软件打开。
+                </p>
+                <a href="{{ url_for('contracts.download_file', contract_id=contract.id, file_id=file.id) }}" class="btn-industrial">
+                    下载文件
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{#
+  login.html - 用户登录页 / User Login Page
+  
+  FSZN ERP 系统登录入口：
+  Login entry for FSZN ERP system:
+  
+  Features / 功能:
+  - 用户名/真实姓名登录 / Username/real name login
+  - 密码验证 / Password authentication
+  - 注册引导链接 / Register page link
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Form Fields / 表单字段:
+  - username: 用户名或真实姓名 / Username or real name
+  - password: 密码 / Password
+#}
+{% extends 'base.html' %}
+
+{% block title %}登录 - {{ config.COMPANY_NAME }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 60vh;">
+    <div class="glass-panel" style="width: 100%; max-width: 420px; padding: 40px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+        <div style="text-align: center; margin-bottom: 32px;">
+            <h1 style="margin: 0; font-size: 2rem; font-weight: 700; letter-spacing: 1px;">欢迎回来</h1>
+            <p style="color: var(--color-text-sub); margin-top: 8px;">登录您的 CORE 账号</p>
+        </div>
+
+        <form method="post">
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">用户名 / 真实姓名</label>
+                <input type="text" name="username" class="form-control" style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 1rem;" placeholder="请输入用户名" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">密码</label>
+                <input type="password" name="password" class="form-control" style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 1rem;" placeholder="请输入密码" required>
+            </div>
+
+            <button type="submit" class="btn-industrial" style="width: 100%; padding: 12px; font-size: 1rem; margin-bottom: 16px;">立即登录</button>
+        </form>
+
+        <div style="text-align: center; font-size: 0.9rem; color: var(--color-text-sub); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;">
+            <span>还没有账号？</span>
+            <a href="{{ url_for('auth.register') }}" style="color: var(--color-primary); text-decoration: none; font-weight: 500;">注册新账号</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

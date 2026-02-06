@@ -1,0 +1,8 @@
+Flask
+Flask-SQLAlchemy
+# python link odbc package for database connectivity
+pyodbc 
+python-dotenv
+flask-login
+requests
+waitress

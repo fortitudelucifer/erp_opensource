@@ -1,0 +1,305 @@
+{#
+  files.html - 文件管理页 / File Management Page
+  
+  项目文件的上传、下载、预览和版本管理：
+  Upload, download, preview and version control for project files:
+  
+  Features / 功能:
+  - 多条件筛选 (类型、公开状态、是否删除) / Multi-filter
+  - 拖拽上传 + 批量上传 / Drag-and-drop + batch upload
+  - 文件预览和下载 / File preview and download
+  - 版本标记 (最新版) / Version marking (latest)
+  - 软删除 (管理员可恢复) / Soft delete (admin recoverable)
+  
+  File Types / 文件类型:
+  - contract: 合同文件 / Contract files
+  - tech: 技术文档 / Technical docs
+  - drawing: 图纸 / Drawings
+  - invoice: 其它 / Others
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - contract: 合同对象 / Contract object
+  - files: 文件列表 / File list
+  - latest_ids: 最新版本 ID 集合 / Latest version IDs
+  - filter_*: 筛选条件 / Filter values
+  - human_filesize: 文件大小格式化函数 / Size formatter
+#}
+{% extends 'base.html' %}
+
+{% block title %}文件管理 - {{ contract.project_code }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+    {# 项目头部 / Project header #}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <div style="font-size: 0.9rem; color: var(--color-text-sub);">项目编号: <span style="color: var(--color-primary); font-family: monospace;">{{ contract.project_code }}</span></div>
+            <h2 style="margin: 4px 0 0 0; font-size: 1.5rem; font-weight: 700;">{{ contract.name }} - 文件管理</h2>
+        </div>
+        <a href="{{ url_for('contracts.list_contracts') }}" class="btn-industrial" style="background: transparent; border: 1px solid rgba(255,255,255,0.2);">返回列表</a>
+    </div>
+
+    {# 功能标签页 / Tab navigation #}
+    <div style="display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding: 12px 4px 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 5; margin-top: -12px;">
+        <a href="{{ url_for('contracts.contract_overview', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">总览</a>
+        <a href="{{ url_for('contracts.manage_tasks', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">任务/进度</a>
+        <a href="{{ url_for('contracts.manage_sales', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">销售</a>
+        <a href="{{ url_for('contracts.notify_contract', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">通知</a>
+        <a href="{{ url_for('contracts.manage_leaders', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">负责人</a>
+        <a href="{{ url_for('contracts.manage_procurements', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">采购</a>
+        <a href="{{ url_for('contracts.manage_acceptances', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">验收</a>
+        <a href="{{ url_for('contracts.manage_feedbacks', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">反馈</a>
+        <a href="{{ url_for('contracts.manage_files', contract_id=contract.id) }}" class="btn-industrial" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">文件</a>
+    </div>
+
+    {# 操作风险提示 / Risk warning #}
+
+    <div class="alert alert-warning" style="margin-bottom: 24px; border: 1px solid var(--color-warning); background: rgba(245, 158, 11, 0.1); padding: 16px; border-radius: 8px; color: var(--color-text-main);">
+        <strong style="color: var(--color-warning);">⚠ 操作风险提示：</strong>
+        <ul style="margin: 8px 0 0 20px; padding: 0; font-size: 0.9rem; color: var(--color-text-sub);">
+            <li>删除文件后，普通用户将无法再访问该文件，只能由管理员恢复。</li>
+            <li>上传前请确认文件内容和类型是否正确。</li>
+            <li>大文件会占用较多存储资源，请尽量压缩或拆分上传。</li>
+        </ul>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;">
+        <!-- Left Column: File List -->
+        <div style="flex: 1; min-width: 0;">
+            <!-- Filter Form -->
+            <form method="get" class="glass-panel" style="padding: 16px; border-radius: 8px; box-shadow: none; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); margin-bottom: 24px;">
+                <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="display: block; font-size: 0.8rem; color: var(--color-text-sub); margin-bottom: 4px;">文件类型</label>
+                        <select name="file_type" class="form-control" style="width: 100%;">
+                            <option value="" {% if not filter_file_type %}selected{% endif %}>全部</option>
+                            <option value="contract" {% if filter_file_type=='contract' %}selected{% endif %}>合同</option>
+                            <option value="tech" {% if filter_file_type=='tech' %}selected{% endif %}>技术文档</option>
+                            <option value="drawing" {% if filter_file_type=='drawing' %}selected{% endif %}>图纸</option>
+                            <option value="invoice" {% if filter_file_type=='invoice' %}selected{% endif %}>其它</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="display: block; font-size: 0.8rem; color: var(--color-text-sub); margin-bottom: 4px;">公开状态</label>
+                        <select name="is_public" class="form-control" style="width: 100%;">
+                            <option value="" {% if not filter_is_public %}selected{% endif %}>全部</option>
+                            <option value="1" {% if filter_is_public=='1' %}selected{% endif %}>只看公开</option>
+                            <option value="0" {% if filter_is_public=='0' %}selected{% endif %}>只看未公开</option>
+                        </select>
+                    </div>
+                    {% if user and user.role in ['admin', 'boss'] %}
+                    <div style="padding-bottom: 8px;">
+                        <label style="font-size: 0.9rem; cursor: pointer;">
+                            <input type="checkbox" name="show_deleted" value="1" {% if filter_show_deleted %}checked{% endif %}> 显示删除
+                        </label>
+                    </div>
+                    {% endif %}
+                    <div style="padding-bottom: 8px;">
+                        <label style="font-size: 0.9rem; cursor: pointer;">
+                            <input type="checkbox" name="latest_only" value="1" {% if filter_latest_only %}checked{% endif %}> 只看最新
+                        </label>
+                    </div>
+                    <button type="submit" class="btn-industrial" style="padding: 8px 16px; font-size: 0.9rem;">筛选</button>
+                </div>
+            </form>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">文件列表</h3>
+                <div style="font-size: 0.85rem; color: var(--color-text-sub);">共 {{ files|length }} 个文件</div>
+            </div>
+
+            {% if files %}
+            <div class="table-container">
+                <table class="ind-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">文件名</th>
+                            <th style="width: 10%;">类型</th>
+                            <th style="width: 10%;">版本</th>
+                            <th style="width: 10%;">作者</th>
+                            <th style="width: 10%;">大小</th>
+                            <th style="width: 10%;">公开</th>
+                            <th style="width: 20%; text-align: right;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in files %}
+                        <tr>
+                            <td>
+                                <div style="font-weight: 500; word-break: break-all;">{{ f.stored_filename }}</div>
+                                <div style="font-size: 0.8rem; color: var(--color-text-sub);">原名: {{ f.original_filename }}</div>
+                            </td>
+                            <td>
+                                {% if f.file_type == 'contract' %}合同
+                                {% elif f.file_type == 'tech' %}技术文档
+                                {% elif f.file_type == 'drawing' %}图纸
+                                {% else %}其它{% endif %}
+                            </td>
+                            <td>
+                                {{ f.version }}
+                                {% if latest_ids and f.id in latest_ids %}
+                                <span class="status-badge active" style="font-size: 0.7rem; padding: 2px 6px;">最新</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ f.author }}</td>
+                            <td style="font-family: monospace;">{{ human_filesize(f.file_size) }}</td>
+                            <td>
+                                {% if f.is_public %}
+                                <span style="color: var(--color-accent);">是</span>
+                                {% else %}
+                                <span style="color: var(--color-text-sub);">否</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                <div style="display: flex; gap: 12px; justify-content: center; align-items: center;">
+                                    <a href="{{ url_for('contracts.preview_file', contract_id=contract.id, file_id=f.id) }}" target="_blank" style="color: var(--color-primary); text-decoration: none; font-size: 0.85rem;">预览</a>
+                                    <a href="{{ url_for('contracts.download_file', contract_id=contract.id, file_id=f.id) }}" style="color: var(--color-text-main); text-decoration: none; font-size: 0.85rem;">下载</a>
+                                    <form method="post" action="{{ url_for('contracts.delete_file', contract_id=contract.id, file_id=f.id) }}" style="display:inline; margin:0;">
+                                        <button type="submit" onclick="return confirm('确认删除该文件？');" class="btn-text" style="color: var(--color-danger); background: transparent; border: none; cursor: pointer; font-size: 0.85rem; padding: 0;">删除</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 48px; color: var(--color-text-sub); border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">
+                暂无文件，请在右侧上传。
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Upload Form -->
+        <div class="glass-panel" style="width: 400px; max-width: 100%; flex-shrink: 0; padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); height: fit-content;">
+            <h3 style="margin: 0 0 16px 0;">上传新文件</h3>
+            
+            <form method="post" enctype="multipart/form-data" id="uploadForm">
+                <style>
+                    .upload-box {
+                        border: 2px dashed rgba(255,255,255,0.2);
+                        background: rgba(255,255,255,0.02);
+                        padding: 32px 16px;
+                        border-radius: 8px;
+                        text-align: center;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        margin-bottom: 24px;
+                    }
+                    .upload-box:hover, .upload-box.dragover {
+                        border-color: var(--color-primary);
+                        background: rgba(37, 99, 235, 0.1);
+                    }
+                    #uploadText {
+                        font-size: 1rem;
+                        font-weight: 600;
+                        color: var(--color-primary);
+                        margin-bottom: 8px;
+                    }
+                    .upload-subtext {
+                        font-size: 0.85rem;
+                        color: var(--color-text-sub);
+                    }
+                    .file-list {
+                        margin-top: 16px;
+                        background: rgba(0,0,0,0.2);
+                        border-radius: 4px;
+                        padding: 8px;
+                        max-height: 200px;
+                        overflow-y: auto;
+                    }
+                    .file-list-item {
+                        padding: 4px 8px;
+                        font-size: 0.85rem;
+                        border-bottom: 1px solid rgba(255,255,255,0.05);
+                    }
+                    .file-list-item:last-child { border-bottom: none; }
+                </style>
+                
+                <div id="uploadBox" class="upload-box">
+                    <div id="uploadText">点击或拖拽文件至此</div>
+                    <div class="upload-subtext">支持多选 (Ctrl+Click)</div>
+                    <input type="file" id="fileInput" name="files" multiple style="display: none;">
+                </div>
+                
+                <div id="fileList" class="file-list" style="display: none;"></div>
+
+                <div class="form-group" style="margin-bottom: 16px; margin-top: 24px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">文件类型 <span style="color: var(--color-danger);">*</span></label>
+                    <select name="file_type" class="form-control" style="width: 100%;" required>
+                        <option value="contract">合同</option>
+                        <option value="tech">技术文档</option>
+                        <option value="drawing">图纸</option>
+                        <option value="invoice">其它</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">版本 <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" name="version" class="form-control" style="width: 100%; box-sizing: border-box;" placeholder="如：1.0" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer;">
+                        <input type="checkbox" name="is_public" value="1">
+                        对客户公开
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-industrial" style="width: 100%;">确认上传</button>
+            </form>
+            
+            <div style="margin-top: 16px; font-size: 0.8rem; color: var(--color-text-sub); line-height: 1.5;">
+                <p>提示：系统将自动重命名文件：<br>客户_项目_合同_日期_类型_版本.ext</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const uploadBox = document.getElementById("uploadBox");
+    const fileInput = document.getElementById("fileInput");
+    const fileListDiv = document.getElementById("fileList");
+    const uploadText = document.getElementById("uploadText");
+
+    uploadBox.onclick = () => fileInput.click();
+
+    uploadBox.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadBox.classList.add("dragover");
+    });
+
+    uploadBox.addEventListener("dragleave", () => {
+        uploadBox.classList.remove("dragover");
+    });
+
+    uploadBox.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadBox.classList.remove("dragover");
+        fileInput.files = e.dataTransfer.files;
+        updateFileList();
+    });
+
+    fileInput.onchange = updateFileList;
+
+    function updateFileList() {
+        const files = fileInput.files;
+        if (!files.length) {
+            fileListDiv.style.display = "none";
+            uploadText.innerText = "点击或拖拽文件至此";
+            return;
+        }
+        uploadText.innerText = `已选择 ${files.length} 个文件`;
+        let html = "";
+        for (let f of files) {
+            html += `<div class="file-list-item">${f.name}</div>`;
+        }
+        fileListDiv.innerHTML = html;
+        fileListDiv.style.display = "block";
+    }
+</script>
+{% endblock %}

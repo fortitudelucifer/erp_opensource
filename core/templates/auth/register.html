@@ -1,0 +1,83 @@
+{#
+  register.html - 用户注册页 / User Registration Page
+  
+  FSZN ERP 新用户注册：
+  New user registration for FSZN ERP:
+  
+  Features / 功能:
+  - 用户名唯一性校验 / Unique username validation
+  - 真实姓名绑定 / Real name binding
+  - 联系方式录入 / Contact info entry
+  - 密码确认 / Password confirmation
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Form Fields / 表单字段:
+  - username: 系统唯一用户名 / Unique username
+  - real_name: 真实姓名 / Real name
+  - email: 邮箱 (可选) / Email (optional)
+  - phone: 手机号 / Phone number
+  - wechat: 企业微信号 / WeCom ID
+  - password/confirm: 密码及确认 / Password
+#}
+{% extends 'base.html' %}
+
+{% block title %}注册 - {{ config.COMPANY_NAME }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 40px 0;">
+    <div class="glass-panel" style="width: 100%; max-width: 500px; padding: 40px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+        <div style="text-align: center; margin-bottom: 32px;">
+            <h1 style="margin: 0; font-size: 2rem; font-weight: 700; letter-spacing: 1px;">加入我们</h1>
+            <p style="color: var(--color-text-sub); margin-top: 8px;">创建您的 CORE 账号</p>
+        </div>
+
+        <form method="post">
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">用户名 (系统唯一)</label>
+                <input type="text" name="username" class="form-control" style="width: 100%; box-sizing: border-box; padding: 12px;" placeholder="建议使用姓名拼音" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">真实姓名</label>
+                <input type="text" name="real_name" class="form-control" style="width: 100%; box-sizing: border-box; padding: 12px;" placeholder="请输入真实姓名" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">邮箱</label>
+                <input type="email" name="email" class="form-control" style="width: 100%; box-sizing: border-box; padding: 12px;" placeholder="example@company.com">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">手机号</label>
+                    <input type="text" name="phone" class="form-control" style="width: 100%; box-sizing: border-box; padding: 12px;" required>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">企业微信号</label>
+                    <input type="text" name="wechat" class="form-control" style="width: 100%; box-sizing: border-box; padding: 12px;" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                <div>
+                    <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">密码</label>
+                    <input type="password" name="password" class="form-control" style="width: 100%; box-sizing: border-box; padding: 12px;" required>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">确认密码</label>
+                    <input type="password" name="confirm" class="form-control" style="width: 100%; box-sizing: border-box; padding: 12px;" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-industrial" style="width: 100%; padding: 12px; font-size: 1rem; margin-bottom: 16px;">立即注册</button>
+        </form>
+
+        <div style="text-align: center; font-size: 0.9rem; color: var(--color-text-sub); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;">
+            <span>已有账号？</span>
+            <a href="{{ url_for('auth.login') }}" style="color: var(--color-primary); text-decoration: none; font-weight: 500;">返回登录</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

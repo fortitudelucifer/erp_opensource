@@ -1,0 +1,56 @@
+{#
+  edit_person.html - 编辑人员页 / Edit Person Page
+  
+  修改现有组织成员信息：
+  Modify existing organization member:
+  
+  Features / 功能:
+  - 修改人员姓名 / Edit name
+  - 调整所属部门 / Change department
+  - 更新职位信息 / Update position
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - person: 当前人员对象 / Current person object
+  - departments: 部门列表 / Department list
+#}
+{% extends 'base.html' %}
+
+{% block title %}编辑人员 - {{ person.name }}{% endblock %}
+
+{% block content %}
+<h1>编辑人员</h1>
+
+<p>
+    <a href="{{ url_for('org.list_persons') }}">返回人员列表</a>
+</p>
+
+<form method="post">
+    <p>
+        姓名：
+        <input type="text" name="name" value="{{ person.name }}">
+    </p>
+    <p>
+        部门：
+        <select name="department_id">
+            <option value="">-- 请选择部门 --</option>
+            {% for d in departments %}
+                <option value="{{ d.id }}"
+                        {% if person.department_id == d.id %}selected{% endif %}>
+                    {{ d.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </p>
+    <p>
+        职位（例如：工程师 / 会计 / 采购员 / 销售员）：
+        <input type="text" name="position" value="{{ person.position }}">
+    </p>
+    <p>
+        <button type="submit">保存</button>
+        <a href="{{ url_for('org.list_persons') }}">取消</a>
+    </p>
+</form>
+{% endblock %}

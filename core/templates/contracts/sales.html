@@ -1,0 +1,145 @@
+{#
+  sales.html - 销售信息管理 / Sales Information Management
+  
+  管理项目的销售和报价信息：
+  Manage sales and quotation info for projects:
+  
+  Features / 功能:
+  - 销售信息展示 (报价、负责人、日期) / Sales info display
+  - 新增/更新销售信息表单 / Add/update form
+  - 删除销售信息 / Delete sales info
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - contract: 合同对象 / Contract object
+  - sales: 销售信息对象 / Sales info object
+  - persons: 人员列表 / Person list
+#}
+{% extends 'base.html' %}
+
+{% block title %}销售信息 - {{ contract.project_code }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+    {# 项目头部 / Project header #}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <div style="font-size: 0.9rem; color: var(--color-text-sub);">项目编号: <span style="color: var(--color-primary); font-family: monospace;">{{ contract.project_code }}</span></div>
+            <h2 style="margin: 4px 0 0 0; font-size: 1.5rem; font-weight: 700;">{{ contract.name }} - 销售信息</h2>
+        </div>
+        <a href="{{ url_for('contracts.list_contracts') }}" class="btn-industrial" style="background: transparent; border: 1px solid rgba(255,255,255,0.2);">返回列表</a>
+    </div>
+
+    {# 功能标签页 / Tab navigation #}
+    <div style="display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding: 12px 4px 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 5; margin-top: -12px;">
+        <a href="{{ url_for('contracts.contract_overview', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">总览</a>
+        <a href="{{ url_for('contracts.manage_tasks', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">任务/进度</a>
+        <a href="{{ url_for('contracts.manage_sales', contract_id=contract.id) }}" class="btn-industrial" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">销售</a>
+        <a href="{{ url_for('contracts.notify_contract', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">通知</a>
+        <a href="{{ url_for('contracts.manage_leaders', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">负责人</a>
+        <a href="{{ url_for('contracts.manage_procurements', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">采购</a>
+        <a href="{{ url_for('contracts.manage_acceptances', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">验收</a>
+        <a href="{{ url_for('contracts.manage_feedbacks', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">反馈</a>
+        <a href="{{ url_for('contracts.manage_files', contract_id=contract.id) }}" class="btn-industrial" style="background: transparent; border: none; color: var(--color-text-sub);">文件</a>
+    </div>
+
+    {# 双栏布局 / Two-column layout #}
+    <div style="display: grid; grid-template-columns: 1fr 350px; gap: 24px;">
+        {# 左栏：销售信息展示 / Left: sales info display #}
+        <div>
+            <h3 style="margin: 0 0 16px 0;">当前销售信息</h3>
+            
+            {% if sales %}
+            <div class="glass-panel" style="padding: 24px; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 24px;">
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 4px;">报价金额</div>
+                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--color-accent);">
+                            ¥ {{ sales.quote_amount if sales.quote_amount is not none else '0.00' }}
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 4px;">销售负责人</div>
+                        <div style="font-size: 1.1rem;">
+                            {{ sales.sales_person.name if sales.sales_person else '未指定' }}
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 4px;">报价日期</div>
+                        <div>{{ sales.quote_date or '-' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 4px;">成交日期</div>
+                        <div>{{ sales.deal_date or '-' }}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <div style="font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 4px;">备注</div>
+                    <div style="line-height: 1.6; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 4px;">
+                        {{ sales.remarks or '无备注' }}
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <form method="post" action="{{ url_for('contracts.delete_sales', contract_id=contract.id) }}">
+                        <button type="submit" onclick="return confirm('确认删除该销售信息？');" class="btn-text" style="color: var(--color-danger); background: transparent; border: none; cursor: pointer;">
+                            删除此销售信息
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 48px; color: var(--color-text-sub); border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">
+                暂无销售信息，请在右侧录入。
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Edit Form -->
+        <div class="glass-panel" style="padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); height: fit-content;">
+            <h3 style="margin: 0 0 16px 0;">{% if sales %}更新信息{% else %}新增信息{% endif %}</h3>
+            <form method="post">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">报价金额 (元)</label>
+                    <input type="number" step="0.01" name="quote_amount" class="form-control" style="width: 100%; box-sizing: border-box;" 
+                           value="{% if sales and sales.quote_amount is not none %}{{ sales.quote_amount }}{% endif %}">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">销售负责人</label>
+                    <select name="sales_person_id" class="form-control" style="width: 100%;">
+                        <option value="">未指定</option>
+                        {% for p in persons %}
+                        <option value="{{ p.id }}" {% if sales and sales.sales_person and sales.sales_person.id == p.id %}selected{% endif %}>
+                            {{ p.name }} - {{ p.position }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">报价日期</label>
+                    <input type="date" name="quote_date" class="form-control" style="width: 100%; box-sizing: border-box;"
+                           value="{{ sales.quote_date if sales and sales.quote_date else '' }}">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">成交日期</label>
+                    <input type="date" name="deal_date" class="form-control" style="width: 100%; box-sizing: border-box;"
+                           value="{{ sales.deal_date if sales and sales.deal_date else '' }}">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px;">备注</label>
+                    <textarea name="remarks" class="form-control" style="width: 100%; box-sizing: border-box;" rows="4">{{ sales.remarks if sales and sales.remarks else '' }}</textarea>
+                </div>
+
+                <button type="submit" class="btn-industrial" style="width: 100%;">保存销售信息</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

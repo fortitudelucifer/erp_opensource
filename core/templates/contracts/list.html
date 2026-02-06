@@ -1,0 +1,260 @@
+{#
+  list.html - 项目列表页 / Project List Page
+  
+  系统核心页面，展示所有项目/合同的列表视图：
+  Core system page displaying all projects/contracts in list view:
+  
+  Views / 视图模式:
+  - Card View: 卡片视图 (移动端默认) / Card view (mobile default)
+  - Table View: 表格视图 / Table view
+  
+  Features / 功能:
+  - 多条件筛选 (客户公司、项目名称) / Multi-condition filtering
+  - 视图切换 (卡片/表格) / View switching (card/table)
+  - 状态标签显示 / Status tag display
+  - 部门负责人展示 / Department leader display
+  - 最新反馈摘要 / Latest feedback summary
+  - 快捷操作入口 / Quick action entries
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  - components.css (卡片和表格样式 / Card and table styles)
+  
+  Variables / 传入变量:
+  - contracts: 合同列表 / Contract list
+  - statuses: 状态映射 {id: {text, level}} / Status map
+  - leaders_by_contract: 负责人映射 / Leaders map
+  - feedback_summary_by_contract: 反馈摘要 / Feedback summary
+  - company, name: 筛选条件 / Filter values
+#}
+{% extends 'base.html' %}
+
+{% block title %}项目管理 - {{ config.COMPANY_NAME }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+    {# 页面头部：标题和快捷入口 / Page header: title and quick links #}
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700;">项目管理中心</h2>
+            <div style="font-size: 0.9rem; color: var(--color-text-sub);">
+                <a href="{{ url_for('contracts.new_contract') }}" style="color: var(--color-primary); text-decoration: none; font-weight: 600;">+ 新建项目</a>
+                <span style="margin: 0 8px; opacity: 0.3;">|</span>
+                <a href="{{ url_for('contracts.tasks_by_department') }}" style="color: var(--color-text-sub); text-decoration: none;">部门任务看板</a>
+                <span style="margin: 0 8px; opacity: 0.3;">|</span>
+                <a href="{{ url_for('contracts.tasks_by_person') }}" style="color: var(--color-text-sub); text-decoration: none;">人员任务看板</a>
+            </div>
+        </div>
+
+        {# 筛选表单：支持按公司和名称筛选 / Filter form: filter by company and name #}
+        <form method="get" class="glass-panel" style="padding: 16px; border-radius: 8px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
+            <div>
+                <label style="display: block; font-size: 0.75rem; color: var(--color-text-sub); margin-bottom: 4px;">客户公司</label>
+                <input type="text" name="company" value="{{ company or '' }}" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 0.9rem; width: 140px;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.75rem; color: var(--color-text-sub); margin-bottom: 4px;">项目/合同名称</label>
+                <input type="text" name="name" value="{{ name or '' }}" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 0.9rem; width: 140px;">
+            </div>
+            <div>
+                <button type="submit" class="btn-industrial" style="padding: 6px 16px; font-size: 0.85rem;">筛选</button>
+                <a href="{{ url_for('contracts.list_contracts') }}" style="font-size: 0.85rem; color: var(--color-text-sub); margin-left: 8px; text-decoration: none;">重置</a>
+            </div>
+        </form>
+    </div>
+
+    {# 视图切换工具栏：卡片/表格切换 / View switcher toolbar: card/table toggle #}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="font-size: 0.9rem; color: var(--color-text-sub);">
+            共 <span style="font-weight: 700; color: var(--color-text-main);">{{ contracts|length }}</span> 个项目
+        </div>
+        <div class="view-switcher">
+            <button class="view-btn active" id="btn-view-card" onclick="switchView('card')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                卡片
+            </button>
+            <button class="view-btn" id="btn-view-table" onclick="switchView('table')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                列表
+            </button>
+        </div>
+    </div>
+
+    {# ========== 表格视图 / Table View ========== #}
+    <div id="view-table" class="table-container" style="display: none;">
+        <table class="ind-table">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">项目信息</th>
+                    <th style="width: 10%;">计划交付</th>
+                    <th style="width: 8%;">状态</th>
+                    <th style="width: 25%;">部门负责人</th>
+                    <th style="width: 20%;">最新反馈</th>
+                    <th style="width: 15%;">快捷操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in contracts %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">{{ c.project_code }}</div>
+                        <a href="{{ url_for('contracts.manage_tasks', contract_id=c.id) }}" style="color: var(--color-text-main); font-weight: 500;">{{ c.name }}</a>
+                        <div style="font-size: 0.85rem; color: var(--color-text-sub); margin-top: 4px;">{{ c.company.name if c.company else '-' }}</div>
+                    </td>
+                    <td>
+                        <div style="font-family: monospace; font-size: 0.95rem;">
+                            {{ c.planned_delivery_date.strftime('%Y-%m-%d') if c.planned_delivery_date else '-' }}
+                        </div>
+                    </td>
+                    <td>
+                        {% set st = statuses.get(c.id) %}
+                        {% if st %}
+                            {% set badge_class = 'status-badge ' + st.level %}
+                            <span class="{{ badge_class }}">{{ st.text }}</span>
+                        {% else %}
+                            <span class="status-badge">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
+                            {% set dept_map = leaders_by_contract.get(c.id, {}) %}
+                            <div>
+                                <span style="color: var(--color-text-sub);">机械:</span>
+                                {% set persons = dept_map.get('机械部') or dept_map.get('机械设计部') or [] %}
+                                {{ persons|map(attribute='name')|join(', ')|truncate(10) if persons else '-' }}
+                            </div>
+                            <div>
+                                <span style="color: var(--color-text-sub);">电气:</span>
+                                {% set persons = dept_map.get('电气部') or dept_map.get('电气设计部') or [] %}
+                                {{ persons|map(attribute='name')|join(', ')|truncate(10) if persons else '-' }}
+                            </div>
+                            <div>
+                                <span style="color: var(--color-text-sub);">软件:</span>
+                                {% set persons = dept_map.get('程序部') or dept_map.get('软件部') or [] %}
+                                {{ persons|map(attribute='name')|join(', ')|truncate(10) if persons else '-' }}
+                            </div>
+                            <div>
+                                <span style="color: var(--color-text-sub);">装配:</span>
+                                {% set persons = dept_map.get('装配部') or dept_map.get('调试部') or [] %}
+                                {{ persons|map(attribute='name')|join(', ')|truncate(10) if persons else '-' }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% set fb_sum = feedback_summary_by_contract.get(c.id) %}
+                        {% if fb_sum and fb_sum.records %}
+                            <div style="font-size: 0.85rem;">
+                                <div style="margin-bottom: 4px;">
+                                    {{ fb_sum.records[0].content|truncate(20) }}
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--color-text-sub);">
+                                    {{ fb_sum.unresolved }} 未解决 / {{ fb_sum.total }} 总计
+                                </div>
+                            </div>
+                        {% else %}
+                            <span style="color: var(--color-text-sub); font-size: 0.85rem;">暂无反馈</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a href="{{ url_for('contracts.manage_tasks', contract_id=c.id) }}" class="btn-industrial" style="padding: 4px 8px; font-size: 0.75rem; color: #fff;">任务</a>
+                            <a href="{{ url_for('contracts.contract_overview', contract_id=c.id) }}" style="font-size: 0.85rem; color: var(--color-primary);">总览</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Card View -->
+    <div id="view-card" class="contract-card-grid">
+        {% for c in contracts %}
+        <div class="contract-card">
+            <div class="cc-header">
+                <div>
+                    <div class="cc-title">
+                        <a href="{{ url_for('contracts.manage_tasks', contract_id=c.id) }}" style="text-decoration: none; color: inherit;">
+                            {{ c.name }}
+                        </a>
+                    </div>
+                    <div class="cc-subtitle">{{ c.project_code }} · {{ c.company.name if c.company else '未指定客户' }}</div>
+                </div>
+                {% set st = statuses.get(c.id) %}
+                {% if st %}
+                    {% set badge_class = 'status-badge ' + st.level %}
+                    <div class="{{ badge_class }}" style="font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">{{ st.text }}</div>
+                {% endif %}
+            </div>
+
+            <div class="cc-body">
+                <div class="cc-row">
+                    <span class="cc-label">交付日期:</span>
+                    <span>{{ c.planned_delivery_date.strftime('%Y-%m-%d') if c.planned_delivery_date else '未设定' }}</span>
+                </div>
+                
+                <div style="margin-top: 8px;">
+                    <span class="cc-label" style="display: block; margin-bottom: 4px;">核心负责人:</span>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        {% set dept_map = leaders_by_contract.get(c.id, {}) %}
+                        {% set mech = dept_map.get('机械部') or dept_map.get('机械设计部') %}
+                        {% if mech %}<span class="status-badge" style="font-size: 0.75rem;">机: {{ mech[0].name }}</span>{% endif %}
+                        
+                        {% set elec = dept_map.get('电气部') or dept_map.get('电气设计部') %}
+                        {% if elec %}<span class="status-badge" style="font-size: 0.75rem;">电: {{ elec[0].name }}</span>{% endif %}
+
+                        {% set prog = dept_map.get('程序部') or dept_map.get('软件部') %}
+                        {% if prog %}<span class="status-badge" style="font-size: 0.75rem;">软: {{ prog[0].name }}</span>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="cc-footer">
+                <a href="{{ url_for('contracts.manage_tasks', contract_id=c.id) }}" class="btn-industrial" style="padding: 6px 12px; font-size: 0.8rem;">任务管理</a>
+                <a href="{{ url_for('contracts.contract_overview', contract_id=c.id) }}" class="btn-industrial" style="background-color: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; font-size: 0.8rem;">详情</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+    function switchView(mode) {
+        const table = document.getElementById('view-table');
+        const card = document.getElementById('view-card');
+        const btnTable = document.getElementById('btn-view-table');
+        const btnCard = document.getElementById('btn-view-card');
+
+        if (mode === 'table') {
+            table.style.display = 'block';
+            card.style.display = 'none';
+            btnTable.classList.add('active');
+            btnCard.classList.remove('active');
+            localStorage.setItem('contract_view_mode', 'table');
+        } else {
+            table.style.display = 'none';
+            card.style.display = 'grid';
+            btnTable.classList.remove('active');
+            btnCard.classList.add('active');
+            localStorage.setItem('contract_view_mode', 'card');
+        }
+    }
+
+    // Init based on preference or screen size
+    document.addEventListener('DOMContentLoaded', () => {
+        const saved = localStorage.getItem('contract_view_mode');
+        // If saved, use satisfied. Else if mobile (<768), default card. Else card (per design preference).
+        // Actually, per Phase 3 requirement: "Card View mobile default".
+        if (saved) {
+            switchView(saved);
+        } else {
+            if (window.innerWidth < 768) {
+                switchView('card');
+            } else {
+                switchView('card'); // Defaulting to Card per "Industrial Tech" vibe, user can switch to table
+            }
+        }
+    });
+</script>
+{% endblock %}

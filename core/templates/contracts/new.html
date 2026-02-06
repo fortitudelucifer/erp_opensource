@@ -1,0 +1,79 @@
+{#
+  new.html - 新建项目/合同 / Create New Project/Contract
+  
+  用于创建新项目/合同的表单页面：
+  Form page for creating new projects/contracts:
+  
+  Required Fields / 必填字段 (*):
+  - 客户公司名称 / Client company name
+  - 项目编号 / Project code
+  - 合同名称 / Contract name
+  
+  Optional Fields / 可选字段:
+  - 合同编号, 客户负责人, 联系方式, 我方负责人
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - user: 当前用户 / Current user
+#}
+{% extends 'base.html' %}
+
+{% block title %}新建项目/合同{% endblock %}
+
+{% block content %}
+{# 表单容器 / Form container #}
+<div class="glass-panel" style="padding: 32px; max-width: 800px; margin: 0 auto; border-radius: 12px;">
+    {# 页面标题 / Page title #}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <h2 style="margin: 0; font-size: 1.75rem; font-weight: 700;">新建项目/合同</h2>
+        <a href="{{ url_for('contracts.list_contracts') }}" class="btn-industrial" style="background: transparent; border: 1px solid rgba(255,255,255,0.2);">返回列表</a>
+    </div>
+
+    {# 新建表单 / Create form #}
+    <form method="post">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">客户公司名称 <span style="color: var(--color-danger);">*</span></label>
+                <input type="text" name="company_name" class="form-control" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+            
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">项目编号 <span style="color: var(--color-danger);">*</span></label>
+                <input type="text" name="project_code" class="form-control" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">合同编号</label>
+                <input type="text" name="contract_number" class="form-control" style="width: 100%; box-sizing: border-box;">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">合同名称 <span style="color: var(--color-danger);">*</span></label>
+                <input type="text" name="name" class="form-control" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">客户公司负责人</label>
+                <input type="text" name="client_manager" class="form-control" style="width: 100%; box-sizing: border-box;">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">客户联系方式</label>
+                <input type="text" name="client_contact" class="form-control" style="width: 100%; box-sizing: border-box;">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.9rem; color: var(--color-text-sub); margin-bottom: 8px;">我方公司负责人</label>
+                <input type="text" name="our_manager" class="form-control" style="width: 100%; box-sizing: border-box;">
+            </div>
+        </div>
+
+        <div style="margin-top: 32px; display: flex; gap: 16px;">
+            <button type="submit" class="btn-industrial" style="padding: 10px 32px; font-size: 1rem;">保存项目</button>
+            <a href="{{ url_for('contracts.list_contracts') }}" class="btn-industrial" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 10px 32px; font-size: 1rem;">取消</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
