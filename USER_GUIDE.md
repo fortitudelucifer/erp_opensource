@@ -56,12 +56,12 @@
 ### 4.2 任务概览与甘特图 (Task Overview)
 可视化展示项目进度条和关键节点，帮助管理者把控整体工期。
 
-![任务概览](assets/task overview.png)
+![任务概览](assets/task_overview.png)
 
 ### 4.3 个人任务视图 (Personal View)
 员工可专注查看“指派给我的”任务，减少信息干扰，提升执行效率。
 
-![个人任务](assets/task overview person.png)
+![个人任务](assets/task_overview_person.png)
 
 ---
 
