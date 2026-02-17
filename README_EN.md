@@ -14,6 +14,9 @@ This is a modern industrial process management system built with Python Flask, d
 8.  **📊 Full Process Closed Loop**: Covers the complete data loop from Contract Lifecycle to **Precise Schedule Management**, Production Task Tracking, and Organizational Architecture Management.
 9.  **🖥️ Windows Production Hosting**: Supports **NSSM + Waitress** hosting mode, achieving boot start and 24-hour unattended operation, ensuring the system remains stable in a Windows environment. **Deploy on just one machine for the whole team to use.** The system is also compatible with Linux environments.
 
+### For detailed software information and features, please refer to [USER_GUIDE.md](USER_GUIDE.md) or [USER_GUIDE_EN.md](USER_GUIDE_EN.md).
+
+
 ## 🔄 Standard Workflow
 
 ![Workflow Overview](assets/promo_workflow.png)

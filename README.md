@@ -14,6 +14,8 @@
 8.  **📊 全流程闭环**: 涵盖从 合同生命周期 到 **精准的工期管理**，再到 生产任务追踪 与 组织架构管理 的完整数据闭环。
 9.  **🖥️ Windows 生产级托管**: 支持 **NSSM + Waitress** 托管模式，实现开机自启与 24 小时无人值守运行，确保系统在 Windows 环境下稳定常驻。**只需一台机器部署即可供团队所有人使用**。系统也兼容Linux环境。
 
+### 软件的详细页面情况及介绍请点击查看 [USER_GUIDE.md](USER_GUIDE.md) 或 [USER_GUIDE_EN.md](USER_GUIDE_EN.md)。
+
 ## 🔄 核心工作流 (Standard Workflow)
 
 ![Workflow Overview](assets/promo_workflow.png)
