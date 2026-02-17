@@ -41,6 +41,7 @@ env/
 .project
 .pydevproject
 .settings/
+.vs/
 
 # ============================================
 # Project Specific - IMPORTANT!
@@ -84,3 +85,5 @@ desktop.ini
 *.bak
 *.cache
 .cache/
+
+wechat_article_draft.md
