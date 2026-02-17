@@ -51,6 +51,7 @@ config.py
 
 # 上传文件目录 (用户上传的业务文件)
 core/uploads/
+!core/uploads/demo_preview.pdf
 uploads/
 
 # 日志文件
