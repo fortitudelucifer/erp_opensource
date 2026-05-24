@@ -1,0 +1,130 @@
+{#
+  users.html - 用户管理列表页 / User Management List Page
+  
+  管理员通过此页面管理系统用户：
+  Admin manages system users through this page:
+  
+  Features / 功能:
+  - 用户列表 (用户名、姓名、角色、状态) / User list
+  - 新建用户 / Create user
+  - 编辑/删除/启用禁用/重置密码 / Edit/delete/toggle/reset password
+  - 待审核用户提示 / Pending users notification
+  
+  Dependencies / 依赖:
+  - base.html (父模板 / Parent template)
+  
+  Variables / 传入变量:
+  - users: 用户列表 / User list
+  - role_labels: 角色中文映射 / Role label mapping
+  - pending_count: 待审核用户数 / Pending user count
+#}
+{% extends 'base.html' %}
+
+{% block title %}用户管理 - {{ config.COMPANY_NAME }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700;">用户管理</h2>
+            <div style="font-size: 0.9rem; color: var(--color-text-sub);">
+                共 <span style="font-weight: 700; color: var(--color-text-main);">{{ users|length }}</span> 个用户
+            </div>
+        </div>
+        <a href="{{ url_for('user_mgmt.new_user') }}" class="btn-industrial" style="padding: 8px 20px;">+ 新建用户</a>
+    </div>
+
+    {# 待审核用户提示 #}
+    {% if pending_count > 0 %}
+    <div style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.1rem;">⚠️</span>
+        <span style="color: #eab308; font-weight: 600;">有 {{ pending_count }} 个用户等待审核</span>
+    </div>
+    {% endif %}
+
+    {% if users %}
+    <div class="table-container">
+        <table class="ind-table">
+            <thead>
+                <tr>
+                    <th style="width: 12%;">用户名</th>
+                    <th style="width: 12%;">真实姓名</th>
+                    <th style="width: 14%;">角色</th>
+                    <th style="width: 10%;">状态</th>
+                    <th style="width: 14%;">手机号</th>
+                    <th style="width: 14%;">创建时间</th>
+                    <th style="width: 24%; text-align: center;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr style="{% if not u.is_active %}opacity: 0.5;{% endif %}{% if u.status == 'pending' %}background: rgba(234, 179, 8, 0.05);{% endif %}">
+                    <td style="font-weight: 600;">{{ u.username }}</td>
+                    <td>{{ u.real_name }}</td>
+                    <td>
+                        <span class="status-badge" style="font-size: 0.8rem;">{{ role_labels.get(u.role, u.role) }}</span>
+                    </td>
+                    <td>
+                        {% if u.status == 'pending' %}
+                            <span class="status-badge warning" style="font-size: 0.8rem;">待审核</span>
+                        {% elif not u.is_active %}
+                            <span class="status-badge danger" style="font-size: 0.8rem;">已禁用</span>
+                        {% else %}
+                            <span class="status-badge success" style="font-size: 0.8rem;">正常</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-family: monospace; font-size: 0.9rem;">{{ u.phone or '-' }}</td>
+                    <td style="font-size: 0.85rem; color: var(--color-text-sub);">
+                        {{ u.created_at.strftime('%Y-%m-%d %H:%M') if u.created_at else '-' }}
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
+                            {# 待审核用户：显示审核按钮 #}
+                            {% if u.status == 'pending' %}
+                            <form method="post" action="{{ url_for('user_mgmt.approve_user', user_id=u.id) }}" style="display:inline; margin:0;">
+                                <select name="role" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem;">
+                                    {% for value, label in role_choices %}
+                                    <option value="{{ value }}" {% if value == 'customer' %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn-industrial" style="padding: 3px 10px; font-size: 0.75rem; background: rgba(34,197,94,0.2); border: 1px solid rgba(34,197,94,0.4); color: #22c55e;">
+                                    通过
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            {# 编辑 #}
+                            <a href="{{ url_for('user_mgmt.edit_user', user_id=u.id) }}" style="font-size: 0.85rem; color: var(--color-primary); text-decoration: none;">编辑</a>
+
+                            {# 重置密码 #}
+                            <form method="post" action="{{ url_for('user_mgmt.reset_password', user_id=u.id) }}" style="display:inline; margin:0;" onsubmit="return confirm('确认重置 {{ u.real_name }} 的密码？');">
+                                <button type="submit" style="background: transparent; border: none; color: var(--color-text-sub); cursor: pointer; font-size: 0.85rem; text-decoration: underline;">重置密码</button>
+                            </form>
+
+                            {# 启用/禁用 #}
+                            <form method="post" action="{{ url_for('user_mgmt.toggle_user', user_id=u.id) }}" style="display:inline; margin:0;">
+                                {% if u.is_active %}
+                                <button type="submit" style="background: transparent; border: none; color: #eab308; cursor: pointer; font-size: 0.85rem;" onclick="return confirm('确认禁用 {{ u.real_name }}？');">禁用</button>
+                                {% else %}
+                                <button type="submit" style="background: transparent; border: none; color: #22c55e; cursor: pointer; font-size: 0.85rem;">启用</button>
+                                {% endif %}
+                            </form>
+
+                            {# 删除 #}
+                            <form method="post" action="{{ url_for('user_mgmt.delete_user', user_id=u.id) }}" style="display:inline; margin:0;" onsubmit="return confirm('⚠️ 确认删除用户 {{ u.real_name }}？此操作不可恢复！');">
+                                <button type="submit" style="background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem;">删除</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 48px; color: var(--color-text-sub); border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">
+        当前还没有用户，请点击右上角新建。
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -27,9 +27,17 @@ def create_app():
 
     @app.before_request
     def restrict_customer_access():
-        # 1. 放行静态资源（CSS/JS），否则页面会乱码
+        # 0. 放行静态资源（CSS/JS），否则页面会乱码
         if request.endpoint and request.endpoint.startswith('static'):
             return
+
+        # 0.5 首次运行检测：如果未完成设置向导，强制跳转到 /setup
+        from .setup_wizard import is_setup_complete
+        if not is_setup_complete():
+            # 放行设置向导自身的端点，避免无限重定向
+            if request.endpoint and request.endpoint.startswith('setup.'):
+                return
+            return redirect(url_for('setup.step1'))
 
         # 2. 获取当前登录用户 ID
         user_id = session.get('user_id')
@@ -92,15 +100,49 @@ def create_app():
     from .logs import logs_bp
     app.register_blueprint(logs_bp, url_prefix='/logs')
 
+    # 用户管理（仅 admin/boss 可访问）
+    from .user_mgmt import user_mgmt_bp
+    app.register_blueprint(user_mgmt_bp, url_prefix='/admin')
+
+    # 系统设置（仅 admin/boss 可访问）
+    from .settings import settings_bp
+    app.register_blueprint(settings_bp, url_prefix='/admin')
+
+    # 设置向导（首次启动引导）
+    from .setup_wizard import setup_bp
+    app.register_blueprint(setup_bp)
+
+    # 帮助中心
+    from .help import help_bp
+    app.register_blueprint(help_bp)
+
+    # 全局模板变量：注入当前登录用户，供导航栏权限判断
+    @app.context_processor
+    def inject_current_user():
+        from .models import User
+        u = User.query.get(session.get('user_id')) if session.get('user_id') else None
+        return dict(current_user=u)
+
 
     @app.route('/')
     def home():
         from .models import User
+        import json
         user = None
+        guide_dismissed = True
         user_id = session.get('user_id')
         if user_id:
             user = User.query.get(user_id)
-        return render_template('home.html', user=user)
+            # 加载引导状态
+            data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+            cfg_path = os.path.join(data_dir, 'config.json')
+            try:
+                with open(cfg_path, 'r', encoding='utf-8') as f:
+                    cfg = json.load(f)
+                guide_dismissed = cfg.get('guide_dismissed', False)
+            except Exception:
+                guide_dismissed = False
+        return render_template('home.html', user=user, guide_dismissed=guide_dismissed)
 
     def human_filesize(num_bytes):
         if num_bytes is None:

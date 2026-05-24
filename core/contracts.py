@@ -601,6 +601,57 @@ def edit_contract(contract_id: int):
     return render_template('contracts/edit.html', user=user, contract=contract, company=company)
 
 
+# 删除项目/合同
+
+@contracts_bp.route('/<int:contract_id>/delete', methods=['POST'])
+@login_required
+def delete_contract(contract_id: int):
+    """删除项目/合同及其所有关联数据（仅管理员/老板可操作）"""
+    from .models import OperationLog
+
+    user_id = session.get('user_id')
+    user = User.query.get(user_id) if user_id else None
+
+    # 权限检查：仅 admin / boss 可以删除项目
+    if not user or normalize_role(user.role) not in ('admin', 'boss'):
+        flash('仅管理员或老板有权删除项目')
+        return redirect(url_for('contracts.list_contracts'))
+
+    contract = Contract.query.get_or_404(contract_id)
+
+    # 记录日志数据（删除前保存）
+    deleted_info = {
+        "project_code": contract.project_code,
+        "contract_number": contract.contract_number,
+        "name": contract.name,
+        "company": contract.company.name if contract.company else "",
+    }
+
+    # 级联删除所有关联数据
+    # 1. 操作日志
+    OperationLog.query.filter_by(contract_id=contract.id).delete()
+    # 2. 项目文件
+    ProjectFile.query.filter_by(contract_id=contract.id).delete()
+    # 3. 售后反馈
+    Feedback.query.filter_by(contract_id=contract.id).delete()
+    # 4. 验收记录
+    Acceptance.query.filter_by(contract_id=contract.id).delete()
+    # 5. 采购项
+    ProcurementItem.query.filter_by(contract_id=contract.id).delete()
+    # 6. 任务
+    Task.query.filter_by(contract_id=contract.id).delete()
+    # 7. 销售信息
+    SalesInfo.query.filter_by(contract_id=contract.id).delete()
+    # 8. 部门负责人
+    ProjectDepartmentLeader.query.filter_by(contract_id=contract.id).delete()
+
+    # 删除合同本身
+    db.session.delete(contract)
+    db.session.commit()
+
+    flash(f'项目 [{deleted_info["project_code"]}] {deleted_info["name"]} 已彻底删除')
+    return redirect(url_for('contracts.list_contracts'))
+
 
 @contracts_bp.route('/<int:contract_id>/notify', methods=['GET', 'POST'])
 @login_required

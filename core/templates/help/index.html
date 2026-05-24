@@ -1,0 +1,272 @@
+{#
+  help/index.html - 帮助中心 / Help Center
+  FAQ 手风琴布局，分类标签筛选
+#}
+{% extends 'base.html' %}
+
+{% block title %}帮助中心 - {{ config.COMPANY_NAME }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px; max-width: 800px; margin: 0 auto;">
+    <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700;">❓ 帮助中心</h2>
+    <p style="color: var(--color-text-sub); margin: 0 0 24px 0; font-size: 0.9rem;">常见问题与使用指南</p>
+
+    {# 分类标签 #}
+    <div style="display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;" id="faq-tabs">
+        <button class="faq-tab active" onclick="filterFAQ('all')" data-cat="all" style="padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: var(--color-primary); color: #fff; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">全部</button>
+        <button class="faq-tab" onclick="filterFAQ('start')" data-cat="start" style="padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--color-text-sub); cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">🚀 快速开始</button>
+        <button class="faq-tab" onclick="filterFAQ('project')" data-cat="project" style="padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--color-text-sub); cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">📋 项目管理</button>
+        <button class="faq-tab" onclick="filterFAQ('user')" data-cat="user" style="padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--color-text-sub); cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">👥 用户权限</button>
+        <button class="faq-tab" onclick="filterFAQ('system')" data-cat="system" style="padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--color-text-sub); cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">🔧 系统维护</button>
+    </div>
+
+    {# FAQ 列表 #}
+    <div id="faq-list" style="display: flex; flex-direction: column; gap: 8px;">
+
+        {# ── 快速开始 ── #}
+        <div class="faq-item" data-category="start">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>管理员如何创建员工账号？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>有两种方式为员工创建账号：</p>
+                <p><strong>方式一：管理员直接创建</strong><br>登录后点击导航栏「用户管理」→ 点击「新建用户」→ 填写信息并选择角色 → 保存。账号立即可用。</p>
+                <p><strong>方式二：员工自行注册</strong><br>将邀请码告诉员工 → 员工打开注册页面 → 输入邀请码和个人信息 → 提交后等待管理员审核。</p>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="start">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>如何查看和设置邀请码？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>点击导航栏「⚙️ 设置」→ 基本设置 Tab → 页面底部可以看到当前邀请码。</p>
+                <p>点击「🔄 重新生成」按钮可以随时更换邀请码，旧邀请码立即失效。</p>
+                <p><em>提示：邀请码是6位数字，建议通过内部通讯工具私下告知员工。</em></p>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="start">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>员工如何注册和登录？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p><strong>注册步骤：</strong></p>
+                <ol>
+                    <li>打开管理员提供的系统地址（如 http://192.168.1.xxx:8000）</li>
+                    <li>点击「注册新账号」</li>
+                    <li>输入管理员提供的6位邀请码</li>
+                    <li>填写个人信息和密码</li>
+                    <li>提交后等待管理员审核通过</li>
+                </ol>
+                <p><strong>登录：</strong>审核通过后，用用户名和密码登录即可。</p>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="start">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>局域网内的其他电脑如何访问系统？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>CORE ERP 启动后，黑色控制台窗口会显示「局域网访问」地址，例如：</p>
+                <code style="display: block; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; margin: 8px 0; color: #63b3ed;">http://192.168.1.100:8000</code>
+                <p>同一局域网（WiFi/有线）下的任何设备，在浏览器输入这个地址即可访问。</p>
+                <p><em>如果无法访问，请检查 Windows 防火墙是否放行了 8000 端口（安装包会自动配置）。</em></p>
+            </div>
+        </div>
+
+        {# ── 项目管理 ── #}
+        <div class="faq-item" data-category="project">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>如何新建合同/项目？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>登录后点击导航栏「项目/合同」→ 点击「新建合同」→ 填写项目信息（名称、编号、客户、金额等）→ 保存。</p>
+                <p>新建的项目默认状态为「进行中」，后续可以在项目详情页修改状态。</p>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="project">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>如何上传文件附件？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>进入项目详情页 → 点击「文件管理」Tab → 点击「上传文件」→ 选择文件并填写描述 → 上传。</p>
+                <p>支持常见文件格式（PDF、Word、Excel、图片等），单个文件大小限制为 50MB。</p>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="project">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>如何给项目分配任务？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>进入项目详情页 → 点击「任务分配」Tab → 选择负责部门和人员 → 设置截止日期 → 保存。</p>
+                <p>被分配的人员登录后可以在首页看到自己的待办任务。</p>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="project">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>如何查看项目进度？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>首页仪表盘显示核心指标（合同总数、进行中、预警项目等）。</p>
+                <p>点击「项目/合同」可以看到所有项目列表，支持按状态、日期筛选。</p>
+            </div>
+        </div>
+
+        {# ── 用户权限 ── #}
+        <div class="faq-item" data-category="user">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>系统有哪些用户角色？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <table style="width: 100%; border-collapse: collapse; margin: 8px 0;">
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <td style="padding: 8px; font-weight: 600; color: #ef4444;">admin</td>
+                        <td style="padding: 8px;">系统管理员，拥有所有权限，可管理用户、设置、查看日志</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <td style="padding: 8px; font-weight: 600; color: #f59e0b;">boss</td>
+                        <td style="padding: 8px;">老板/总经理，可查看所有数据和报表</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <td style="padding: 8px; font-weight: 600; color: #3b82f6;">manager</td>
+                        <td style="padding: 8px;">部门经理，管理本部门项目和人员</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; font-weight: 600; color: #22c55e;">employee</td>
+                        <td style="padding: 8px;">普通员工，查看和处理分配给自己的任务</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="user">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>如何修改员工角色？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>仅管理员可操作：「用户管理」→ 找到对应用户 → 点击「编辑」→ 修改角色 → 保存。</p>
+                <p>角色变更立即生效，用户下次刷新页面时会看到新的权限。</p>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="user">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>忘记密码怎么办？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>目前系统不支持自助找回密码。请联系管理员：</p>
+                <p>管理员操作：「用户管理」→ 找到对应用户 → 点击「编辑」→ 设置新密码 → 保存。</p>
+                <p>然后将新密码告知该员工即可。</p>
+            </div>
+        </div>
+
+        {# ── 系统维护 ── #}
+        <div class="faq-item" data-category="system">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>如何备份数据？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>CORE ERP 使用 SQLite 数据库，所有数据存储在一个文件中：</p>
+                <code style="display: block; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; margin: 8px 0; color: #63b3ed;">C:\CoreERP\data\erp.db</code>
+                <p><strong>备份方法：</strong>定期复制 <code>data</code> 文件夹到U盘或网盘即可。</p>
+                <p><em>建议：每周至少备份一次，重要操作前也建议备份。</em></p>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="system">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>服务无法启动怎么办？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p><strong>排查步骤：</strong></p>
+                <ol>
+                    <li>检查端口占用：确认 8000 端口没有被其他程序占用</li>
+                    <li>查看服务日志：<code>C:\CoreERP\data\service.log</code></li>
+                    <li>尝试手动启动：双击 <code>C:\CoreERP\start.bat</code> 查看错误信息</li>
+                    <li>重启服务：在设置 → 系统信息 Tab 点击「重启服务」</li>
+                    <li>如以上都无效，重启电脑后再试</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="system">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>如何更新到新版本？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p><strong>更新步骤：</strong></p>
+                <ol>
+                    <li>备份 <code>data</code> 文件夹（重要！）</li>
+                    <li>下载新版安装包</li>
+                    <li>直接运行新版安装包，选择相同安装目录覆盖安装</li>
+                    <li>安装程序会自动停止旧服务、安装新版、启动新服务</li>
+                    <li>您的数据会自动保留</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="system">
+            <div class="faq-q" onclick="toggleFAQ(this)">
+                <span>如何实现互联网远程访问？</span><span class="faq-arrow">▸</span>
+            </div>
+            <div class="faq-a">
+                <p>请前往「⚙️ 设置」→「远程访问」Tab，我们提供了三种方案的详细教程：</p>
+                <ul>
+                    <li><strong>Tailscale</strong>（推荐）— 最简单，适合小团队</li>
+                    <li><strong>FRP 内网穿透</strong> — 需要公网服务器</li>
+                    <li><strong>云服务器部署</strong> — 最稳定，适合长期运营</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.faq-q {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; cursor: pointer; font-weight: 500; font-size: 0.95rem;
+    color: var(--color-text-main); transition: background 0.2s;
+    border-radius: 8px;
+}
+.faq-q:hover { background: rgba(255,255,255,0.03); }
+.faq-arrow { color: var(--color-text-sub); transition: transform 0.2s; font-size: 0.8rem; }
+.faq-item.open .faq-arrow { transform: rotate(90deg); }
+.faq-a {
+    display: none; padding: 0 18px 14px 18px;
+    color: var(--color-text-sub); font-size: 0.9rem; line-height: 1.7;
+}
+.faq-item.open .faq-a { display: block; }
+.faq-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px; transition: all 0.2s;
+}
+.faq-item.open { border-color: rgba(37,99,235,0.3); background: rgba(37,99,235,0.03); }
+.faq-a p { margin: 6px 0; }
+.faq-a ol, .faq-a ul { margin: 6px 0; padding-left: 20px; }
+.faq-a li { margin: 4px 0; }
+.faq-a code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+.faq-tab.active { background: var(--color-primary) !important; color: #fff !important; border-color: var(--color-primary) !important; }
+</style>
+
+<script>
+function toggleFAQ(el) {
+    el.parentElement.classList.toggle('open');
+}
+function filterFAQ(cat) {
+    document.querySelectorAll('.faq-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelector('.faq-tab[data-cat="'+cat+'"]').classList.add('active');
+    document.querySelectorAll('.faq-item').forEach(function(item) {
+        if (cat === 'all' || item.dataset.category === cat) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

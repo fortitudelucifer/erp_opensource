@@ -1,0 +1,337 @@
+{#
+  settings.html - 系统设置页面 / System Settings Page
+
+  Tab 页布局：基本设置 | 远程访问 | 系统信息
+  Tabbed layout: Basic Settings | Remote Access | System Info
+
+  Variables / 传入变量:
+  - cfg: 当前配置 dict / Current config dict
+  - tab: 当前激活的 tab / Currently active tab
+  - sys_info: 系统信息 dict / System info dict
+#}
+{% extends 'base.html' %}
+
+{% block title %}系统设置 - {{ config.COMPANY_NAME }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 24px; border-radius: 12px;">
+    <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700;">⚙️ 系统设置</h2>
+
+    {# Tab 导航 #}
+    <div style="display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0;">
+        <a href="{{ url_for('settings.index', tab='basic') }}"
+           style="padding: 10px 20px; text-decoration: none; font-weight: 500; font-size: 0.95rem; border-bottom: 2px solid {% if tab == 'basic' %}var(--color-primary){% else %}transparent{% endif %}; color: {% if tab == 'basic' %}var(--color-primary){% else %}var(--color-text-sub){% endif %}; transition: all 0.2s;">
+            基本设置
+        </a>
+        <a href="{{ url_for('settings.index', tab='remote') }}"
+           style="padding: 10px 20px; text-decoration: none; font-weight: 500; font-size: 0.95rem; border-bottom: 2px solid {% if tab == 'remote' %}var(--color-primary){% else %}transparent{% endif %}; color: {% if tab == 'remote' %}var(--color-primary){% else %}var(--color-text-sub){% endif %}; transition: all 0.2s;">
+            远程访问
+        </a>
+        <a href="{{ url_for('settings.index', tab='system') }}"
+           style="padding: 10px 20px; text-decoration: none; font-weight: 500; font-size: 0.95rem; border-bottom: 2px solid {% if tab == 'system' %}var(--color-primary){% else %}transparent{% endif %}; color: {% if tab == 'system' %}var(--color-primary){% else %}var(--color-text-sub){% endif %}; transition: all 0.2s;">
+            系统信息
+        </a>
+    </div>
+
+    {# ─── Tab: 基本设置 ─── #}
+    {% if tab == 'basic' %}
+    <div style="max-width: 600px;">
+        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; color: var(--color-text-main);">公司信息</h3>
+        <form method="post" action="{{ url_for('settings.update_company') }}" style="display: flex; flex-direction: column; gap: 16px;">
+            <div>
+                <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px; font-weight: 500;">
+                    公司名称 <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="text" name="company_name" value="{{ cfg.get('company_name', '') }}"
+                       style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px 14px; border-radius: 6px; font-size: 0.95rem; box-sizing: border-box;"
+                       placeholder="公司全称" required>
+                <div style="font-size: 0.75rem; color: var(--color-text-sub); margin-top: 4px;">显示在系统标题栏和首页</div>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.85rem; color: var(--color-text-sub); margin-bottom: 6px; font-weight: 500;">页脚版权文字</label>
+                <input type="text" name="copyright_text" value="{{ cfg.get('copyright_text', '') }}"
+                       style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px 14px; border-radius: 6px; font-size: 0.95rem; box-sizing: border-box;"
+                       placeholder="例如：2026 某某公司 版权所有">
+                <div style="font-size: 0.75rem; color: var(--color-text-sub); margin-top: 4px;">显示在每个页面底部</div>
+            </div>
+            <button type="submit" class="btn-industrial" style="padding: 10px 28px; font-size: 0.95rem; width: fit-content;">保存修改</button>
+        </form>
+
+        {# 邀请码管理 #}
+        <div style="margin-top: 32px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px;">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: var(--color-text-main);">🔑 员工注册邀请码</h3>
+            <div style="background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.2); border-radius: 10px; padding: 20px 24px;">
+                <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 10px;">员工注册时需要输入此邀请码，可防止外部人员恶意注册</div>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 12px 24px; border-radius: 8px; font-family: monospace; font-size: 1.8rem; letter-spacing: 8px; color: #63b3ed; font-weight: 700;">
+                        {{ cfg.get('invite_code', '未设置') }}
+                    </div>
+                    <form method="post" action="{{ url_for('settings.regenerate_invite_code') }}" style="margin: 0;">
+                        <button type="submit" class="btn-industrial" style="padding: 8px 16px; font-size: 0.85rem; background: rgba(255,255,255,0.08);">🔄 重新生成</button>
+                    </form>
+                </div>
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">
+                    💡 将此邀请码告诉员工，员工即可自行注册。重新生成后旧码失效。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ─── Tab: 远程访问 (Tailscale 引导) ─── #}
+    {% elif tab == 'remote' %}
+    <div style="max-width: 700px;">
+        <div style="background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.2); border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+            <div style="font-size: 1.1rem; font-weight: 600; color: #63b3ed; margin-bottom: 8px;">🌐 什么是远程访问？</div>
+            <div style="color: #94a3b8; line-height: 1.7; font-size: 0.95rem;">
+                安装 Tailscale 后，您可以在<strong style="color: #e2e8f0;">家里、出差时</strong>通过手机或电脑访问公司的 ERP 系统。<br>
+                完全<strong style="color: #22c55e;">免费</strong>，无需公网 IP，无需复杂的网络配置。适合需要异地办公的团队。
+            </div>
+        </div>
+
+        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; color: #63b3ed;">📋 三步开通远程访问</h3>
+
+        {# Step 1 #}
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px 24px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #3b82f6); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0;">1</div>
+                <div style="font-weight: 600; font-size: 1rem;">注册 Tailscale 账号</div>
+            </div>
+            <div style="color: #94a3b8; font-size: 0.9rem; line-height: 1.8; padding-left: 44px;">
+                <p>① 打开 <a href="https://tailscale.com" target="_blank" rel="noopener" style="color: #63b3ed;">tailscale.com</a>，点击右上角 <strong style="color: #e2e8f0;">"Get Started"</strong></p>
+                <p>② <strong style="color: #22c55e;">推荐使用微软账号登录</strong>（国内网络最顺畅）</p>
+                <p>③ 免费版支持最多 100 台设备，完全够用</p>
+            </div>
+        </div>
+
+        {# Step 2 #}
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px 24px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #3b82f6); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0;">2</div>
+                <div style="font-weight: 600; font-size: 1rem;">在服务器电脑上安装客户端</div>
+            </div>
+            <div style="color: #94a3b8; font-size: 0.9rem; line-height: 1.8; padding-left: 44px;">
+                <p>① 打开 <a href="https://tailscale.com/download" target="_blank" rel="noopener" style="color: #63b3ed;">tailscale.com/download</a> 下载 Windows 版本</p>
+                <p>② 运行安装程序，一路 Next 即可</p>
+                <p>③ 安装完成后，<strong style="color: #e2e8f0;">右下角系统托盘</strong>会出现 Tailscale 图标</p>
+                <p>④ 右键点击图标 → <strong style="color: #e2e8f0;">Log in...</strong> → 用第一步注册的账号登录</p>
+                <p>⑤ 登录成功后会看到一个 <strong style="color: #22c55e;">100.x.x.x</strong> 格式的地址，这就是远程访问地址</p>
+            </div>
+        </div>
+
+        {# Step 3 #}
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #059669, #10b981); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0;">3</div>
+                <div style="font-weight: 600; font-size: 1rem;">在远程设备上访问</div>
+            </div>
+            <div style="color: #94a3b8; font-size: 0.9rem; line-height: 1.8; padding-left: 44px;">
+                <p>① 在需要远程访问的设备（手机/电脑）上也安装 Tailscale</p>
+                <p>② <strong style="color: #e2e8f0;">用同一个账号登录</strong></p>
+                <p>③ 在浏览器中打开：</p>
+                <div style="background: rgba(0,0,0,0.3); padding: 10px 16px; border-radius: 6px; margin: 8px 0; font-family: monospace; font-size: 1rem; color: #63b3ed;">
+                    http://100.x.x.x:8000
+                </div>
+                <p>（将 100.x.x.x 替换为第二步中看到的地址）</p>
+                <p>④ 把这个地址告诉需要远程访问的同事即可 ✅</p>
+            </div>
+        </div>
+
+        {# 手机端提示 #}
+        <div style="background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px 20px; margin-bottom: 20px;">
+            <div style="font-weight: 600; color: #22c55e; margin-bottom: 6px;">📱 手机端</div>
+            <div style="color: #94a3b8; font-size: 0.9rem; line-height: 1.7;">
+                在 App Store / Google Play 搜索 <strong style="color: #e2e8f0;">"Tailscale"</strong> 下载安装，<br>
+                登录同一账号，即可在手机上随时访问 ERP 系统。
+            </div>
+        </div>
+
+        {# 学习资源 #}
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px 20px;">
+            <div style="font-weight: 600; color: var(--color-text-main); margin-bottom: 10px;">📚 更多学习资源</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem;">
+                <div style="color: #94a3b8;">
+                    📖 <strong style="color: #e2e8f0;">什么值得买</strong> — 搜索 "Tailscale 保姆级教程"（图文，推荐零基础阅读）
+                </div>
+                <div style="color: #94a3b8;">
+                    🎬 <strong style="color: #e2e8f0;">B站</strong> — 搜索 "Tailscale 异地组网教程"（视频，跟做最方便）
+                </div>
+                <div style="color: #94a3b8;">
+                    📖 <a href="https://tailscale.com/kb" target="_blank" rel="noopener" style="color: #63b3ed;">官方文档</a>（英文，进阶用户参考）
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px 16px; background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.15); border-radius: 8px; font-size: 0.85rem; color: #eab308;">
+            💡 <strong>提示</strong>：注册 Tailscale 时建议用<strong>微软账号</strong>登录，国内网络最顺畅。
+        </div>
+    </div>
+
+        {# ── 方案 B: FRP ── #}
+        <div style="margin-top: 20px; border-left: 3px solid #3b82f6; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid #3b82f6; border-radius: 10px; overflow: hidden;">
+            <div onclick="this.parentElement.classList.toggle('open')" style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-weight: 600; font-size: 1rem;">🔗 方案 B：FRP 内网穿透</span>
+                    <span style="margin-left: 8px; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: rgba(59,130,246,0.15); color: #3b82f6;">需技术基础</span>
+                </div>
+                <span style="color: var(--color-text-sub); font-size: 0.8rem;">⭐⭐⭐ 中等 · ¥50-100/月 ▸</span>
+            </div>
+            <div class="remote-detail" style="display: none; padding: 0 20px 20px; color: #94a3b8; font-size: 0.9rem; line-height: 1.8;">
+                <p><strong style="color: #e2e8f0;">适合场景：</strong>有公网服务器的技术团队，需要固定地址对外提供服务</p>
+                <p><strong style="color: #e2e8f0;">原理：</strong>通过一台有公网 IP 的云服务器做中转，将内网的 CORE ERP 端口暴露到公网</p>
+                <p style="font-weight: 600; color: #e2e8f0; margin-top: 12px;">操作步骤：</p>
+                <ol>
+                    <li>购买一台云服务器（阿里云/腾讯云最低配即可，约 ¥50-100/月）</li>
+                    <li>在服务器上下载并运行 <a href="https://github.com/fatedier/frp/releases" target="_blank" style="color: #63b3ed;">frps</a>（服务端）</li>
+                    <li>在 CORE ERP 所在电脑上下载并运行 frpc（客户端）</li>
+                    <li>配置 frpc.toml（示例如下）</li>
+                    <li>通过 <code style="color: #63b3ed;">http://你的服务器IP:8000</code> 访问</li>
+                </ol>
+                <div style="background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 8px; margin-top: 8px; font-family: monospace; font-size: 0.82rem; line-height: 1.6; color: #63b3ed;">
+                    # frpc.toml 示例配置<br>
+                    serverAddr = "你的云服务器IP"<br>
+                    serverPort = 7000<br><br>
+                    [[proxies]]<br>
+                    name = "core-erp"<br>
+                    type = "tcp"<br>
+                    localIP = "127.0.0.1"<br>
+                    localPort = 8000<br>
+                    remotePort = 8000
+                </div>
+            </div>
+        </div>
+
+        {# ── 方案 C: 云服务器 ── #}
+        <div style="margin-top: 12px; border-left: 3px solid #a855f7; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid #a855f7; border-radius: 10px; overflow: hidden;">
+            <div onclick="this.parentElement.classList.toggle('open')" style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-weight: 600; font-size: 1rem;">☁️ 方案 C：云服务器部署</span>
+                    <span style="margin-left: 8px; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: rgba(168,85,247,0.15); color: #a855f7;">最稳定</span>
+                </div>
+                <span style="color: var(--color-text-sub); font-size: 0.8rem;">⭐⭐⭐⭐ 较难 · ¥100-300/月 ▸</span>
+            </div>
+            <div class="remote-detail" style="display: none; padding: 0 20px 20px; color: #94a3b8; font-size: 0.9rem; line-height: 1.8;">
+                <p><strong style="color: #e2e8f0;">适合场景：</strong>需要稳定长期运营，多人远程使用</p>
+                <p><strong style="color: #e2e8f0;">原理：</strong>将 CORE ERP 直接部署在云服务器上，通过公网 IP 或域名访问</p>
+                <p style="font-weight: 600; color: #e2e8f0; margin-top: 12px;">操作步骤：</p>
+                <ol>
+                    <li>购买云服务器（推荐 Ubuntu 22.04，2核4G 以上）</li>
+                    <li>安装 Python 3.12 + 上传项目代码</li>
+                    <li>使用 Gunicorn + Nginx 部署（生产级方案）</li>
+                    <li>配置域名（可选）和 HTTPS 证书</li>
+                    <li>通过域名或 IP 直接访问</li>
+                </ol>
+                <p style="margin-top: 8px; font-size: 0.82rem; color: #64748b;">💡 此方案需要一定的 Linux 运维经验，建议有技术人员支持时选择。</p>
+            </div>
+        </div>
+
+        <style>
+        .open .remote-detail { display: block !important; }
+        .open > div:first-child span:last-child { transform: rotate(90deg); display: inline-block; }
+        </style>
+    </div>
+
+    {# ─── Tab: 系统信息 ─── #}
+    {% elif tab == 'system' %}
+    <div style="max-width: 600px;">
+        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; color: var(--color-text-main);">系统信息</h3>
+
+        <div class="table-container">
+            <table class="ind-table">
+                <tbody>
+                    <tr>
+                        <td style="font-weight: 500; width: 40%; color: var(--color-text-sub);">CORE ERP 版本</td>
+                        <td><span class="status-badge" style="font-size: 0.85rem;">v{{ sys_info.version }}</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 500; color: var(--color-text-sub);">Python 版本</td>
+                        <td>{{ sys_info.python_version }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 500; color: var(--color-text-sub);">操作系统</td>
+                        <td>{{ sys_info.os }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 500; color: var(--color-text-sub);">数据库模式</td>
+                        <td>
+                            {% if sys_info.db_mode == 'sqlite' %}
+                            <span class="status-badge success" style="font-size: 0.85rem;">SQLite（本地）</span>
+                            {% else %}
+                            <span class="status-badge" style="font-size: 0.85rem;">SQL Server</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 500; color: var(--color-text-sub);">数据库大小</td>
+                        <td>{{ sys_info.db_size }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 500; color: var(--color-text-sub);">注册用户数</td>
+                        <td><strong>{{ sys_info.user_count }}</strong> 人</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 500; color: var(--color-text-sub);">后台服务状态</td>
+                        <td>
+                            {% if sys_info.service_status == 'running' %}
+                            <span class="status-badge success" style="font-size: 0.85rem;">● 运行中</span>
+                            {% elif sys_info.service_status == 'stopped' %}
+                            <span class="status-badge" style="font-size: 0.85rem; background: rgba(239,68,68,0.15); color: #ef4444;">● 已停止</span>
+                            {% elif sys_info.service_status == 'not_installed' %}
+                            <span class="status-badge" style="font-size: 0.85rem; background: rgba(156,163,175,0.15); color: #9ca3af;">未安装服务</span>
+                            {% else %}
+                            <span class="status-badge" style="font-size: 0.85rem;">未知</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        {# 服务管理 #}
+        {% if sys_info.service_status in ['running', 'stopped'] %}
+        <div style="margin-top: 20px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px 20px;">
+            <div style="font-weight: 600; color: var(--color-text-main); margin-bottom: 12px;">🔧 服务管理</div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <form method="POST" action="{{ url_for('settings.restart_service') }}" style="margin: 0;">
+                    <button type="submit" class="btn btn-primary" style="font-size: 0.9rem;"
+                            onclick="return confirm('确定要重启服务吗？页面会短暂无法访问，几秒后自动恢复。')">
+                        🔄 重启服务
+                    </button>
+                </form>
+                <span style="color: #94a3b8; font-size: 0.85rem;">
+                    重启后页面会短暂断开，等待 5 秒后刷新即可
+                </span>
+            </div>
+            <div style="margin-top: 12px; color: #64748b; font-size: 0.82rem; line-height: 1.6;">
+                💡 服务名称: <code style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">CoreERP</code>
+                · 开机自动启动 · 可在 Windows「服务」管理面板中查看
+            </div>
+        </div>
+        {% endif %}
+
+        {# 关于 #}
+        <div style="margin-top: 24px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="32" height="32">
+                    <defs><linearGradient id="abt1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#2563eb"/><stop offset="100%" style="stop-color:#06b6d4"/></linearGradient></defs>
+                    <polygon points="256,40 440,148 440,364 256,472 72,364 72,148" fill="none" stroke="url(#abt1)" stroke-width="24" stroke-linejoin="round"/>
+                    <path d="M320,160 L200,160 Q140,160 140,220 L140,292 Q140,352 200,352 L320,352" fill="none" stroke="url(#abt1)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div>
+                    <div style="font-weight: 700; font-size: 1.05rem;">CORE ERP</div>
+                    <div style="color: #64748b; font-size: 0.82rem;">高效协作，智慧管理</div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem; color: #94a3b8;">
+                <div>📦 版本: <strong style="color: #e2e8f0;">v{{ sys_info.version }}</strong></div>
+                <div>📄 协议: <strong style="color: #e2e8f0;">Apache-2.0</strong></div>
+                <div>🛠️ 技术栈: <strong style="color: #e2e8f0;">Python + Flask + SQLite</strong></div>
+                <div>🌐 <a href="https://github.com/fortitudelucifer/erp_opensource" target="_blank" style="color: #63b3ed; text-decoration: none;">GitHub 仓库 ↗</a></div>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.78rem; color: #475569;">
+                © 2024-2026 CORE ERP Team. Open source software.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

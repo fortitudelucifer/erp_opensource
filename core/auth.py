@@ -93,9 +93,27 @@ def register():
 
         password = request.form.get('password')
         confirm = request.form.get('confirm')
+        invite_code = (request.form.get('invite_code') or '').strip()
 
         if not username or not email or not password or not real_name:
             flash('请填写所有必填项')
+            return render_template('auth/register.html')
+
+        # 校验邀请码
+        import json
+        config_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            'data', 'config.json'
+        )
+        correct_code = None
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    correct_code = json.load(f).get('invite_code')
+            except (json.JSONDecodeError, IOError):
+                pass
+        if correct_code and invite_code != correct_code:
+            flash('邀请码错误，请联系管理员获取')
             return render_template('auth/register.html')
 
         if password != confirm:
@@ -118,7 +136,8 @@ def register():
             phone=phone, # or None     若为空字符串则存 None
             wechat=wechat, # or None   若为空字符串则存 None
             password_hash=generate_password_hash(password),
-            role = 'customer'
+            role = 'customer',
+            status = 'pending',  # 新注册用户需管理员审核
         )
         db.session.add(user)
         db.session.commit()
@@ -140,6 +159,15 @@ def login():
         ).first()
 
         if user and check_password_hash(user.password_hash, password):
+            # 检查账号是否被禁用（兼容旧数据库：无此字段或 None 视为启用）
+            if getattr(user, 'is_active', True) is False:
+                flash('您的账号已被禁用，请联系管理员')
+                return render_template('auth/login.html')
+            # 检查是否待审核（兼容旧数据库：无此字段或 None 视为已通过）
+            user_status = getattr(user, 'status', None)
+            if user_status == 'pending':
+                flash('您的账号正在等待管理员审核，请耐心等待')
+                return render_template('auth/login.html')
             session['user_id'] = user.id
             flash('登录成功')
             return redirect(url_for('home'))

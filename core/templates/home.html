@@ -32,6 +32,79 @@
     <p style="color: var(--color-text-sub);">系统运行状态正常 · 所有服务在线</p>
 </div>
 
+{# 首次登录引导卡片 #}
+{% if current_user and current_user.role == 'admin' and not guide_dismissed %}
+<div id="onboarding-card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(37,99,235,0.08), rgba(6,182,212,0.05)); border: 1px solid rgba(37,99,235,0.2); border-radius: 14px; padding: 24px;">
+    <div style="margin-bottom: 16px;">
+        <h3 style="margin: 0 0 6px 0; font-size: 1.15rem; font-weight: 700;">🎉 欢迎使用 CORE ERP！</h3>
+        <p style="margin: 0; color: var(--color-text-sub); font-size: 0.9rem;">跟着以下步骤快速上手</p>
+    </div>
+    <div style="display: flex; gap: 6px; margin-bottom: 16px;">
+        <div class="guide-dot active" data-step="0" onclick="showStep(0)" style="width: 40px; height: 4px; border-radius: 2px; background: var(--color-primary); cursor: pointer; transition: all 0.3s;"></div>
+        <div class="guide-dot" data-step="1" onclick="showStep(1)" style="width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.3s;"></div>
+        <div class="guide-dot" data-step="2" onclick="showStep(2)" style="width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.3s;"></div>
+        <div class="guide-dot" data-step="3" onclick="showStep(3)" style="width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.3s;"></div>
+        <div class="guide-dot" data-step="4" onclick="showStep(4)" style="width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.3s;"></div>
+    </div>
+    <div id="guide-steps">
+        <div class="guide-step" data-idx="0" style="display: flex; gap: 16px; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px;">
+            <div style="font-size: 2rem; min-width: 50px; text-align: center;">🔑</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 4px;">① 查看邀请码</div>
+                <div style="color: var(--color-text-sub); font-size: 0.88rem;">员工注册需要邀请码，请在设置中查看并告诉员工</div>
+            </div>
+            <a href="{{ url_for('settings.index', tab='basic') }}" class="btn btn-primary" style="font-size: 0.85rem; white-space: nowrap; padding: 8px 16px;">去查看 →</a>
+        </div>
+        <div class="guide-step" data-idx="1" style="display: none; gap: 16px; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px;">
+            <div style="font-size: 2rem; min-width: 50px; text-align: center;">👤</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 4px;">② 创建员工账号</div>
+                <div style="color: var(--color-text-sub); font-size: 0.88rem;">在「用户管理」中为每位员工创建账号并分配角色</div>
+            </div>
+            <a href="{{ url_for('user_mgmt.list_users') }}" class="btn btn-primary" style="font-size: 0.85rem; white-space: nowrap; padding: 8px 16px;">去创建 →</a>
+        </div>
+        <div class="guide-step" data-idx="2" style="display: none; gap: 16px; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px;">
+            <div style="font-size: 2rem; min-width: 50px; text-align: center;">🌐</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 4px;">③ 告诉员工访问地址</div>
+                <div style="color: var(--color-text-sub); font-size: 0.88rem;">将当前局域网地址告诉员工，让他们在浏览器中打开</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 8px 14px; border-radius: 6px; color: #63b3ed; font-family: monospace; font-size: 0.85rem;" id="guide-url"></div>
+        </div>
+        <div class="guide-step" data-idx="3" style="display: none; gap: 16px; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px;">
+            <div style="font-size: 2rem; min-width: 50px; text-align: center;">📚</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 4px;">④ 了解核心功能</div>
+                <div style="color: var(--color-text-sub); font-size: 0.88rem;">项目管理、部门人员、文件上传、操作日志</div>
+            </div>
+            <a href="{{ url_for('help.index') }}" class="btn btn-primary" style="font-size: 0.85rem; white-space: nowrap; padding: 8px 16px;">查看帮助 →</a>
+        </div>
+        <div class="guide-step" data-idx="4" style="display: none; gap: 16px; align-items: center; padding: 16px; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px;">
+            <div style="font-size: 2rem; min-width: 50px; text-align: center;">✅</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 4px;">⑤ 完成！</div>
+                <div style="color: var(--color-text-sub); font-size: 0.88rem;">您已掌握基本操作，开始使用吧！</div>
+            </div>
+            <form method="POST" action="{{ url_for('settings.dismiss_guide') }}" style="margin: 0;">
+                <button type="submit" class="btn btn-primary" style="font-size: 0.85rem; padding: 8px 16px; background: #22c55e; border-color: #22c55e;">关闭引导</button>
+            </form>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+        <form method="POST" action="{{ url_for('settings.dismiss_guide') }}" style="margin: 0;">
+            <button type="submit" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.82rem; padding: 4px 8px;">不再显示</button>
+        </form>
+        <button onclick="nextStep()" id="guide-next-btn" style="background: none; border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-main); cursor: pointer; font-size: 0.85rem; padding: 6px 16px; border-radius: 6px;">下一步 →</button>
+    </div>
+</div>
+<script>
+var guideStep=0;
+function showStep(n){guideStep=n;document.querySelectorAll('.guide-step').forEach(function(s){s.style.display='none';});document.querySelectorAll('.guide-dot').forEach(function(d){d.style.background='rgba(255,255,255,0.1)';});var step=document.querySelector('.guide-step[data-idx="'+n+'"]');if(step)step.style.display='flex';var dot=document.querySelector('.guide-dot[data-step="'+n+'"]');if(dot)dot.style.background='var(--color-primary)';document.getElementById('guide-next-btn').style.display=n>=4?'none':'';}
+function nextStep(){if(guideStep<4)showStep(guideStep+1);}
+document.addEventListener('DOMContentLoaded',function(){var u=document.getElementById('guide-url');if(u)u.textContent=window.location.origin;});
+</script>
+{% endif %}
+
 {# Bento Grid 布局：现代化的仪表盘网格布局 / Bento Grid layout: modern dashboard grid layout #}
 <div class="bento-grid">
     {# KPI 卡片区域：显示核心业务指标 / KPI Cards: display core business metrics #}

@@ -26,6 +26,23 @@ License: Apache-2.0
 from datetime import datetime, date
 from . import db
 
+# 角色常量字典 — 供用户管理模板下拉框使用
+# Role choices for user management dropdown menus
+ROLE_CHOICES = [
+    ('admin', '系统管理员'),
+    ('boss', '老板/总经理'),
+    ('sales', '销售人员'),
+    ('mechanical_engineer', '机械工程师'),
+    ('electrical_engineer', '电气工程师'),
+    ('software_engineer', '软件工程师'),
+    ('procurements', '采购人员'),
+    ('service', '售后服务'),
+    ('customer', '外部客户'),
+]
+
+# 角色值 → 中文名映射
+ROLE_LABELS = dict(ROLE_CHOICES)
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -42,6 +59,12 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     role = db.Column(db.String(50), default='customer')  # 加一个默认角色
+
+    # 用户管理：启用/禁用
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    # 用户状态：active（正常）/ pending（待审核）
+    status = db.Column(db.String(20), default='active', nullable=False)
+
 
 
 class Company(db.Model):

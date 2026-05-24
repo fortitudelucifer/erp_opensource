@@ -1,20 +1,68 @@
-# 工业流程 ERP 系统 (开源版) - Industrial Flow ERP
+# CORE ERP v3.0.0 — 开源工业流程管理系统
 
 ![Hero Shot](assets/promo_hero_shot.png)
 
-这是一个基于 Python Flask 打造的现代化工业流程管理系统，专为中小型制造企业设计。相比于市面上通用的 ERP，本项目**核心聚焦于以下企业级价值点**：
+> **一键安装，局域网即用** — 专为中小型制造企业设计的现代化 ERP 系统。
 
-1.  **🌍 零成本异地办公**: 提供完整的 **“内网部署 + Tailscale 专用隧道”** 免费解决方案，即可内网使用也可异地使用，无需公网 IP 也能安全远程访问。
-2.  **🛡️ 严密的权限分层**: 实现了 **老板-部门负责人-员工-客户** 四级权限隔离，确保数据安全边界。
-3.  **💬 多通道消息通知**: 集成 **企业微信、钉钉、邮件及手机短信** 为一体的通知后端，关键节点手动自选通知方式指定提醒负责人。
-4.  **📂 结构化文件管理**: 文件按 **“合同编号”** 自动归档隔离，确保不同项目资料清晰有序，互不干扰。
-5.  **📄 实时文档引擎**: 内置 Office/PDF/图片 预览引擎，图纸与技术文档无需下载，在线即阅。
-6.  **👥 灵活的团队管理**: 合同生命周期中的**工作人员可自由增减**，人员档案（姓名、邮箱、联系方式）自动对应通知后端。
-7.  **📜 全程操作审计**: 后台完整记录所有人员的 **操作日志**，每一项改动均可回溯，保障系统安全。
-8.  **📊 全流程闭环**: 涵盖从 合同生命周期 到 **精准的工期管理**，再到 生产任务追踪 与 组织架构管理 的完整数据闭环。
-9.  **🖥️ Windows 生产级托管**: 支持 **NSSM + Waitress** 托管模式，实现开机自启与 24 小时无人值守运行，确保系统在 Windows 环境下稳定常驻。**只需一台机器部署即可供团队所有人使用**。系统也兼容Linux环境。
+基于 Python Flask 打造，采用 Glassmorphism 玻璃拟态 UI 设计，**核心聚焦以下企业级价值点**：
 
-### 软件的详细页面情况及介绍请点击查看 [USER_GUIDE.md](USER_GUIDE.md) 或 [USER_GUIDE_EN.md](USER_GUIDE_EN.md)。
+1.  **🖥️ 一键安装部署**: Windows 一键安装包，双击即用。内置 Python 运行时、SQLite 数据库、NSSM 服务管理，**零依赖、零配置**。
+2.  **🌍 零成本异地办公**: 提供完整的 **Tailscale / FRP / 云服务器** 三种远程访问方案，无需公网 IP 也能安全远程访问。
+3.  **🛡️ 严密的权限分层**: 实现了 **管理员-老板-部门负责人-员工-客户** 五级权限隔离，支持邀请码注册机制。
+4.  **💬 多通道消息通知**: 集成 **企业微信、钉钉、邮件及手机短信** 为一体的通知后端，关键节点手动自选通知方式指定提醒负责人。
+5.  **📂 结构化文件管理**: 文件按 **"合同编号"** 自动归档隔离，确保不同项目资料清晰有序，互不干扰。
+6.  **📄 实时文档引擎**: 内置 Office/PDF/图片 预览引擎，图纸与技术文档无需下载，在线即阅。
+7.  **👥 灵活的团队管理**: 合同生命周期中的**工作人员可自由增减**，人员档案（姓名、邮箱、联系方式）自动对应通知后端。
+8.  **📜 全程操作审计**: 后台完整记录所有人员的 **操作日志**，每一项改动均可回溯，保障系统安全。
+9.  **📊 全流程闭环**: 涵盖从合同生命周期到**精准的工期管理**，再到生产任务追踪与组织架构管理的完整数据闭环。
+
+### 📖 详细功能演示请查看 [USER_GUIDE.md](USER_GUIDE.md) 或 [USER_GUIDE_EN.md](USER_GUIDE_EN.md)。
+
+---
+
+## 🚀 快速开始（3 分钟上手）
+
+### 方式一：一键安装（推荐 · 普通用户）
+
+适合没有技术背景的管理者，全程无需接触代码。
+
+1. **下载** `CoreERP-Setup-v3.0.0.exe` 安装包
+2. **双击运行**，UAC 弹窗点击「是」
+3. **按提示安装**（默认安装到 `C:\CoreERP`），约 30 秒完成
+4. **浏览器自动打开**，进入设置向导：
+   - Step 1：填写公司名称
+   - Step 2：创建管理员账号和密码
+   - Step 3：完成！进入系统仪表盘
+5. **告诉员工局域网地址**（启动时控制台会显示，如 `http://192.168.1.100:8000`）
+
+> **安装后自动完成的事情**：
+> - ✅ CORE ERP 注册为 Windows 服务，开机自动启动
+> - ✅ 防火墙自动放行 8000 端口，局域网内其他设备可直接访问
+> - ✅ 桌面创建快捷方式，双击即可打开浏览器
+
+### 方式二：源码运行（开发者 · 二次开发）
+
+适合有 Python 开发经验，需要自定义功能的技术人员。
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/fortitudelucifer/erp_opensource.git
+cd erp_opensource
+
+# 2. 创建虚拟环境并安装依赖
+python -m venv venv
+venv\Scripts\activate        # Windows
+pip install -r requirements.txt
+
+# 3. 启动开发服务器
+python run.py
+
+# 4. 访问 http://127.0.0.1:8000，首次打开会进入设置向导
+```
+
+> **说明**：源码运行默认使用 SQLite 数据库（`data/erp.db`），零配置。如需使用 SQL Server 或 PostgreSQL，请修改 `config.py` 中的 `SQLALCHEMY_DATABASE_URI`。
+
+---
 
 ## 🔄 核心工作流 (Standard Workflow)
 
@@ -89,7 +137,7 @@ graph LR
 
 5.  **验收 (Accept)**:
     - 任务完成后发起验收申请。
-    - 质检人员标记验收由“审核中”变更为“通过”或“驳回”。
+    - 质检人员标记验收由"审核中"变更为"通过"或"驳回"。
 
 6.  **交付与售后 (Deliver & Feedback)**:
     - 记录最终交付时间。
@@ -98,6 +146,8 @@ graph LR
 7.  **项目存档 (Archive)**:
     - 项目完成后，将项目存档。
     - 项目情况可筛选、查询和追溯。
+
+---
 
 ## 🚀 核心特色 (Unique Features)
 
@@ -116,7 +166,7 @@ graph LR
   - 🟢 **已验收 (Accepted)**: 绿色完成，代表交付无误。
   - 🔘 **未启动 (Unstarted)**: 灰色静默，代表立项待办。
   - 🔴 **延误 (Risk)**: 红色高亮 (在甘特图中体现)，代表进度逾期。
-- **关键指标**: 首页直观呈现“进行中合同”、“待办任务”、“本月交付”等核心 KPI。
+- **关键指标**: 首页直观呈现"进行中合同"、"待办任务"、"本月交付"等核心 KPI。
 
 ### 2. 动态甘特图 (Interactive Gantt Chart)
 
@@ -134,6 +184,7 @@ graph LR
 
 并非简单的登录验证，系统实现了严密的**角色分层与数据隔离**：
 
+- **管理员 (Admin)**: 系统最高权限，管理用户账号、配置系统、查看所有数据。
 - **老板 (Boss)**: 上帝视角，查看所有项目、财务及员工绩效。
 - **部门负责人 (Leader)**: 仅能管理本部门负责的项目任务与人员。
 - **普通员工 (Staff)**: 只能访问自己参与的任务和被授权的文件。
@@ -151,7 +202,7 @@ graph LR
 
 系统对附件存储进行了深度优化，确保资料管理的严谨性：
 
-- **合同对齐**: 所有上传的文件均严格挂载在对应“合同编号”的文件目录下。
+- **合同对齐**: 所有上传的文件均严格挂载在对应"合同编号"的文件目录下。
 - **物理隔离**: 不同合同的文件在服务器存储层级即是不相通的，从根源上避免了资料混淆。
 - **版本管理**: 支持对同一文件进行版本迭代，保留历史版本，防止误覆盖。
 
@@ -159,7 +210,7 @@ graph LR
 
 ![Audit Logs](assets/promo_audit_log.png)
 
-系统自带“黑匣子”功能，记录系统内发生的一切重要行为：
+系统自带"黑匣子"功能，记录系统内发生的一切重要行为：
 
 - **谁在干什么**: 精确记录操作人、操作时间、IP地址以及具体的改动内容（包含修改前后的值对比）。
 - **回溯追踪**: 管理员可在后台通过日期、项目、人员多维度检索审计日志。
@@ -172,7 +223,7 @@ graph LR
 - **企业微信 / 钉钉**: 通过群机器人同步项目关键变动（如任务下达、合同逾期）。
 - **邮件服务**: 发送正式的业务提醒和报表。
 - **手机短信**: 针对高优先级催办事件，确保信息及时送达。
-- **配置**: 在 `config.py` 中选择 `NOTIFICATION_BACKEND` 并配置相应的 Token/API 即可。
+- **配置**: 在系统「设置 → 基本设置」页面配置相应的 Token/API 即可。
 
 ### 8. 柔性团队管理 (Flexible Staffing)
 
@@ -182,46 +233,68 @@ graph LR
 
 - **结构化档案**: 支持为每位团队成员维护详细档案，包括**姓名、个人邮箱、手机号码**、微信号以及所属部门等关键信息。
 - **自动映射通知**: 核心优势在于档案与通知系统的**自动映射关联**。一旦在项目中指派了负责人，系统会自动调取其档案中的联系方式，通过邮件、短信或企业微信进行精准触达。
-- **自由增减**: 在“项目详情-负责人管理”中，可随时为每个部门增加或移除协助负责人，动态适配项目规模。
+- **自由增减**: 在"项目详情-负责人管理"中，可随时为每个部门增加或移除协助负责人，动态适配项目规模。
 - **权限联动**: 权限随人员进出项目实时更新，无需手动重置账号权限，确保数据安全。
 
-## 🛠️ 安装与使用
+---
 
-### 1. 环境准备
+## 🌍 远程访问方案
 
-- Python 3.8+
-- SQL Server (推荐) 或其他支持 SQLAlchemy 的数据库
+![Remote Access](assets/promo_remote_access.png)
 
-#### 虚拟环境搭建示例 (Windows)
+系统内置了三种互联网远程访问方案的详细教程（位于「设置 → 远程访问」页面）：
 
-```cmd
-D:\code> mkdir your_erp
-D:\code> cd your_erp
-D:\code\your_erp> py -3 -m venv your_erp_preferred
-D:\code\your_erp> venv\Scripts\activate
-```
+| 方案 | 适合场景 | 难度 | 成本 |
+|------|---------|------|------|
+| **Tailscale（推荐）** | 小团队，偶尔远程 | ⭐ 简单 | 免费 |
+| **FRP 内网穿透** | 有技术人员，需固定地址对外服务 | ⭐⭐⭐ 中等 | 需云服务器 ¥50-100/月 |
+| **云服务器部署** | 稳定长期运营，多人远程 | ⭐⭐⭐⭐ 较难 | ¥100-300/月 |
 
-### 2. 安装 SQL Server 2022 Developer (简易指南)
+### Tailscale 快速上手
 
-如果您本地还没有数据库，推荐安装免费的开发者版：
+1. 在 [tailscale.com](https://tailscale.com/) 注册账号（推荐用微软账号登录）
+2. 在 ERP 服务器电脑和远程设备上都安装 Tailscale 客户端
+3. 用同一账号登录，通过分配的 `100.x.x.x` 地址访问 ERP
 
-1.  **下载**: 搜索 "SQL Server 2022 Developer" 并从微软官网下载安装程序。
-2.  **安装**: 运行安装程序，选择 **"基本 (Basic)"** 安装类型即可。
-3.  **工具**: 安装完成后，点击 **"安装 SSMS"** (SQL Server Management Studio) 以便图形化管理数据库。
-    ps：**安装参考链接**：https://www.bilibili.com/video/BV13o4y1V7Jb?spm_id_from=333.788.videopod.episodes&vd_source=d49e0c134bc6c6180dab2a3de3c221f0
+> 详细的 FRP 和云服务器方案教程已内置在系统设置页面中。
 
-### 3. 安装依赖
+---
 
-```bash
-pip install -r requirements.txt
-```
+## ❓ 常见问题 (Troubleshooting)
 
-### 4. 配置
+**Q1: 安装时弹出「拒绝访问」错误?**
 
-```bash
-cp config.example.py config.py
-# 记得修改 config.py 中的数据库连接和 COMPANY_NAME
-```
+- **原因**: 安装需要管理员权限。
+- **解决**: 右键安装包 → 「以管理员身份运行」。
+
+**Q2: 局域网内其他电脑无法访问?**
+
+- **检查**: 确认两台电脑在同一局域网（同一 WiFi 或有线网络）。
+- **解决**: 检查 Windows 防火墙是否放行了 8000 端口（安装包会自动配置，但手动安装的防火墙软件可能拦截）。
+
+**Q3: 忘记管理员密码怎么办?**
+
+- **解决**: 删除 `C:\CoreERP\data\erp.db` 和 `C:\CoreERP\data\config.json`，重启服务后会重新进入设置向导。
+- ⚠️ **注意**: 这会清除所有数据，请提前备份 `data` 文件夹。
+
+**Q4: 如何备份数据?**
+
+- 定期复制 `C:\CoreERP\data\` 文件夹到U盘或网盘即可。核心数据文件为 `data/erp.db`。
+
+**Q5: 如何更新到新版本?**
+
+- 先备份 `data` 文件夹 → 下载新版安装包 → 覆盖安装到相同目录 → 数据自动保留。
+
+**Q6: 端口 8000 被占用?**
+
+- **检查**: `netstat -ano | findstr :8000` 查看占用进程。
+- **解决**: 修改 `launcher.py` 中的 `--port` 参数，或关闭占用端口的程序。
+
+**Q7: 启动时报错 `Non-UTF-8 code`? (开发者)**
+
+- **解决**: 在 VSCode 中将报错文件编码转换为 **UTF-8 without BOM**。
+
+---
 
 ## ⚙️ 二次开发/定制指南 (Customization)
 
@@ -252,127 +325,82 @@ cp config.example.py config.py
 
 ### 4. 更多硬编码修改
 
-- **`config.example.py`**: 这里的示例配置已脱敏。在实际部署时，请搜索代码全局的 `APP_` 变量，确保与您的环境变量一致。
+- **`config.py`**（开发模式）: 数据库URI、密钥、品牌名称等配置项。通知 Token/API 请在系统「设置 → 基本设置」页面操作，无需直接修改代码。
 
-## 📸 系统截图与功能演示 (Screenshots & Guide)
-
-> 📖 **[点击查看完整功能演示手册 (USER_GUIDE.md)](USER_GUIDE.md)**  
-> 本手册收录了 **仪表盘、项目管理、任务排期、供应链、组织架构** 等全模块的真实界面演示。
-
-![Dashboard Preview](assets/base.png)
-
-推荐使用 SQL Server Management Studio (SSMS) 执行以下脚本快速建库：
-
-```sql
--- 1. 创建数据库
-CREATE DATABASE YOUR_DATABASE_NAME;
-GO
-
--- 2. 创建登录账号
-CREATE LOGIN YOUR_USERNAME WITH PASSWORD = 'YOUR_STRONG_PASSWORD!';
-GO
-
--- 3. 赋予权限
-USE YOUR_DATABASE_NAME;
-GO
-CREATE USER YOUR_USERNAME FOR LOGIN YOUR_USERNAME;
-GO
-ALTER ROLE db_owner ADD MEMBER YOUR_USERNAME;
-GO
-```
-
-_(运行 `python run.py` 后，SQLAlchemy 会自动创建表结构)_
-
-### 6. 启动运行
-
-```bash
-python run.py
-```
-
-### 7. 运行与测试
-
-- **激活环境**: 确认虚拟环境已激活（命令行前有 `(venv)` 或您的环境名）。
-- **启动命令**: 在项目根目录执行：`(venv) D:\code\your_erp> python run.py`
-- **访问**: 浏览器打开：[http://127.0.0.1:8000/](http://127.0.0.1:8000/) (默认端口 8000，系统已适配)。
-
-### 8. 生产环境部署建议 (Production Deployment)
-
-![Production Deployment](assets/promo_deployment.png)
-
-- **Windows**: 建议使用 **NSSM** (Non-Sucking Service Manager) 将 Waitress 托管为系统后台服务，即可实现开机自启与 24 小时无人值守运行，无需保持命令行窗口开启。
-- **Linux**: 本项目核心兼容 Linux 环境，但具体的守护进程配置 (如 Systemd + Gunicorn) 请根据您的服务器环境自行探索配置。
-
-## 🌍 零成本·企业级远程接入方案
-
-![Remote Access](assets/promo_remote_access.png)
-
-本系统提供了一套**“内网部署 + 专用隧道”**的免费异地办公解决方案，兼顾了数据的绝对私密性与远程访问的便利性：
-
-1.  **数据安全**: 数据库和应用部署在公司内网服务器，物理隔离，不暴露任何公网端口，无被扫描风险。
-2.  **专用隧道 (Tailscale)**: 利用 WireGuard 协议构建点对点加密隧道。
-    - 员工在家办公时，开启 Tailscale 即可像在公司一样以局域网速度访问 ERP。
-    - **完全免费**: 针对中小团队（< 3用户/100设备）免费，完美契合本系统的目标用户。
-3.  **配置方法**:
-    - 在 `config.py` 中填入 Tailscale 分配的机器域名 (`APP_BASE_URL`)。
-    - 系统会自动识别并适配远程访问时的跳转逻辑。
-
-## ❓ 常见问题 (Troubleshooting)
-
-**Q1: 启动时报错 `Non-UTF-8 code`?**
-
-- **原因**: Windows 上 Visual Studio 默认使用 GBK 编码保存文件。
-- **解决**: 在 VSCode/编辑器中将所有 `html/py` 文件编码强制转换为 **"UTF-8 without BOM"**。
-
-**Q2: 报错 `socket access permission denied` 或端口被占用?**
-
-- **检查**: 输入 `netsh int ipv4 show excludedportrange protocol=tcp` 查看系统保留端口。
-- **解决**: 修改 `run.py` 换一个端口 (如 5000 -> 8000)，或重启电脑释放端口。
-
-**Q3: SQL Server 无法连接?**
-
-- **解决**: 打开 **SQL Server Configuration Manager** -> 网络配置 -> 启用 **TCP/IP** 和 **Named Pipes**，然后重启 SQL Server 服务。
+---
 
 ## 📂 项目结构说明 (File Structure)
 
 ```text
 erp_opensource/
-├── config.py                # [配置中心] 包含数据库URI、密钥、品牌名称、通知Token等
-├── run.py                   # [开发入口] 在激活虚拟环境后，命令行输入 python run.py 即可本地运行 (端口 8000)
-├── wsgi.py                  # [部署入口] 配合 Gunicorn 或 IIS 的产线环境专用接口
-├── requirements.txt         # [依赖清单] Flask, SQLAlchemy, pyodbc 等必要包
+├── config.py                # [配置中心] 数据库URI、密钥、品牌名称等（开发模式）
+├── run.py                   # [开发入口] python run.py 本地运行 (端口 8000)
+├── wsgi.py                  # [部署入口] 配合 Waitress/Gunicorn 的生产环境接口
+├── launcher.py              # [服务入口] 安装包使用的启动器，管理服务生命周期
+├── requirements.txt         # [依赖清单] Flask, SQLAlchemy, Waitress 等
+│
+├── installer/               # [安装包构建]
+│   ├── build.py             #   构建脚本：打包 Python + 依赖 + 源码
+│   ├── core_erp.iss         #   Inno Setup 安装脚本
+│   ├── requirements_build.txt  # 构建专用依赖
+│   └── downloads/           #   Python Embedded / NSSM 缓存
+│
+├── data/                    # [运行时数据]（安装后自动生成）
+│   ├── erp.db               #   SQLite 数据库（所有业务数据）
+│   ├── config.json          #   系统配置（公司名、邀请码等）
+│   ├── uploads/             #   上传文件存储
+│   └── service.log          #   服务运行日志
 │
 └── core/                    # [核心应用包]
-    ├── __init__.py          # 应用工厂：注册蓝图、配置数据库、挂载全局模板过滤器
-    ├── models.py            # [数据模型] 定义 User, Contract, Task 等核心数据库表
-    ├── auth.py              # [安全鉴权] 登录逻辑、权限装饰器 (@staff_required)
-    ├── org.py               # [组织架构] 处理部门与人员的 CRUD 及权限映射
-    ├── contracts.py         # [业务主逻辑] 涵盖合同列表、详情、任务分派、状态流转
-    ├── logs.py              # [审计中心] 操作日志的前端展示与查询
-    ├── operation_log.py     # 日志记录模块，负责将所有改动结构化存入数据库
+    ├── __init__.py          #   应用工厂：注册蓝图、数据库、权限控制
+    ├── models.py            #   数据模型：User, Contract, Task 等
+    ├── auth.py              #   认证鉴权：登录/注册/邀请码验证
+    ├── contracts.py         #   业务主逻辑：合同/项目/任务管理
+    ├── org.py               #   组织架构：部门与人员 CRUD
+    ├── logs.py              #   审计中心：操作日志展示与查询
+    ├── operation_log.py     #   日志记录模块
+    ├── setup_wizard.py      #   [v3 新增] 首次启动设置向导
+    ├── settings.py          #   [v3 新增] 系统设置（公司/远程/系统信息）
+    ├── user_mgmt.py         #   [v3 新增] 用户管理（CRUD + 角色分配）
+    ├── help.py              #   [v3 新增] 帮助中心 FAQ
     │
-    ├── services/            # [服务层] 复杂业务逻辑解耦
-    │   ├── production_service.py   # 生产任务状态流转控制 (开始->待质检->完成)
-    │   ├── procurement_service.py  # 采购逻辑封装
-    │   ├── acceptance_service.py   # 验收流程状态机
-    │   ├── feedback_service.py     # 售后反馈处理逻辑
-    │   ├── file_service.py         # 文件上传、版本管理、权限校验核心逻辑
-    │   ├── preview_service.py      # 文档转换引擎调用 (LibreOffice -> PDF)
-    │   ├── notification_service.py # 消息通知 (钉钉/企微/邮件) 适配器模式实现
-    │   └── common_utils.py         # 配置完整性校验与基础公用工具
+    ├── services/            #   [服务层] 复杂业务逻辑
+    │   ├── production_service.py
+    │   ├── procurement_service.py
+    │   ├── acceptance_service.py
+    │   ├── feedback_service.py
+    │   ├── file_service.py
+    │   ├── preview_service.py
+    │   ├── notification_service.py
+    │   └── common_utils.py
     │
-    ├── static/              # [静态资源]
-    │   ├── css/ (components.css, theme.css - 包含核心 Glassmorphism 玻璃拟态样式变量)
-    │   ├── js/ (main.js - 页面交互脚本)
-    │   └── img/
+    ├── static/              #   [静态资源]
+    │   ├── css/             #     theme.css, components.css (Glassmorphism 样式)
+    │   ├── js/              #     main.js (交互脚本)
+    │   └── img/             #     logo.svg (品牌 Logo)
     │
-    └── templates/           # [视图层] Jinja2 模板
-        ├── base.html        # 全局基座：侧边栏、顶部栏、Flash消息、响应式布局容器
-        ├── home.html        # 仪表盘：Bento Grid 布局的 KPI 卡片与图表
-        ├── auth/            # 认证页面：登录、注册 (毛玻璃背景风格)
-        ├── contracts/       # 业务页面：项目详情、任务看板、甘特图、文件库、销售记录
-        ├── logs/            # 审计日志：操作记录查询与展示
-        └── org/             # 管理页面：人员与部门管理、权限分配
+    └── templates/           #   [视图层] Jinja2 模板
+        ├── base.html        #     全局布局：导航栏、Logo、响应式容器
+        ├── home.html        #     仪表盘：Bento Grid + 首次登录引导卡片
+        ├── auth/            #     登录/注册 (Logo + 渐变背景动效)
+        ├── contracts/       #     项目详情、任务看板、甘特图、文件库
+        ├── admin/           #     [v3 新增] 系统设置、用户管理
+        ├── setup/           #     [v3 新增] 设置向导 3 步流程
+        ├── help/            #     [v3 新增] 帮助中心 FAQ
+        ├── logs/            #     操作日志查询
+        └── org/             #     部门与人员管理
 ```
+
+---
+
+## 📸 系统截图与功能演示 (Screenshots & Guide)
+
+> 📖 **[点击查看完整功能演示手册 (USER_GUIDE.md)](USER_GUIDE.md)**
+> 本手册收录了 **设置向导、仪表盘、项目管理、用户管理、帮助中心** 等全模块的界面演示。
+
+![Dashboard Preview](assets/base.png)
+
+---
 
 ## 📄 开源协议 (License)
 
@@ -384,7 +412,7 @@ erp_opensource/
 - ✅ **任意修改**: 自由修改代码以适配您的业务需求。
 - ✅ **分发**: 复制并分发本项目的副本。
 
-但您需要遵守以下义务（即“署名”）：
+但您需要遵守以下义务（即"署名"）：
 
 - ⚠️ **必须保留版权声明**: 在所有副本或其衍生品中，必须保留原始的 LICENSE 文件与版权声明。
 - ⚠️ **显著声明修改**: 如果您修改了文件，需要进行说明。

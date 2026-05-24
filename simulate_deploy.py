@@ -54,6 +54,8 @@ def init_demo_data():
                 phone='13800000000',
                 wechat='demo_wechat',
                 role='admin',
+                is_active=True,
+                status='active',
                 password_hash=generate_password_hash('123456')
             )
             db.session.add(admin)

@@ -1,0 +1,121 @@
+{#
+  step1.html - 设置向导 Step 1 / Setup Wizard Step 1
+
+  首次启动时的欢迎页面，引导用户输入公司名称。
+  Welcome page on first run, guides user to enter company name.
+#}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CORE ERP - 初始设置</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #0a0f1a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .wizard-container {
+            width: 100%;
+            max-width: 520px;
+            padding: 24px;
+        }
+        .wizard-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(99, 179, 237, 0.15);
+            border-radius: 16px;
+            padding: 48px 40px;
+            backdrop-filter: blur(20px);
+        }
+        .brand { text-align: center; margin-bottom: 40px; }
+        .brand h1 { font-size: 2rem; font-weight: 800; letter-spacing: 0.05em; }
+        .brand h1 span:first-child { color: #63b3ed; }
+        .brand p { color: #94a3b8; margin-top: 8px; font-size: 0.95rem; }
+        .step-indicator {
+            display: flex; gap: 8px; justify-content: center;
+            margin-bottom: 32px;
+        }
+        .step-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+        }
+        .step-dot.active { background: #63b3ed; box-shadow: 0 0 8px rgba(99,179,237,0.4); }
+        .welcome-text {
+            text-align: center; margin-bottom: 32px;
+            font-size: 1.1rem; line-height: 1.7; color: #cbd5e1;
+        }
+        .form-group { margin-bottom: 24px; }
+        .form-group label {
+            display: block; font-size: 0.9rem; color: #94a3b8;
+            margin-bottom: 8px; font-weight: 500;
+        }
+        .form-group input {
+            width: 100%; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12); color: #fff;
+            padding: 14px 18px; border-radius: 8px; font-size: 1.05rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none; border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(99,179,237,0.15);
+        }
+        .form-group input::placeholder { color: #4a5568; }
+        .btn-next {
+            width: 100%; padding: 14px; border: none; border-radius: 8px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: #fff; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            letter-spacing: 0.03em;
+        }
+        .btn-next:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.35); }
+        .flash-msg {
+            background: rgba(234,179,8,0.15); border: 1px solid rgba(234,179,8,0.3);
+            border-radius: 8px; padding: 10px 16px; margin-bottom: 20px;
+            color: #eab308; font-size: 0.9rem; text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="wizard-container">
+        <div class="wizard-card">
+            <div class="brand">
+                <h1><span>CORE</span> <span>ERP</span></h1>
+                <p>企业资源管理系统</p>
+            </div>
+
+            <div class="step-indicator">
+                <div class="step-dot active"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+            </div>
+
+            <div class="welcome-text">
+                欢迎使用 CORE ERP！<br>
+                请完成以下简单设置，即可开始使用。
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for msg in messages %}
+            <div class="flash-msg">{{ msg }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="post" action="{{ url_for('setup.step1') }}">
+                <div class="form-group">
+                    <label>您的公司名称 <span style="color: #ef4444;">*</span></label>
+                    <input type="text" name="company_name" placeholder="例如：上海精密机械有限公司" required autofocus>
+                </div>
+                <button type="submit" class="btn-next">下一步 →</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -156,9 +156,14 @@
                         {% endif %}
                     </td>
                     <td>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
                             <a href="{{ url_for('contracts.manage_tasks', contract_id=c.id) }}" class="btn-industrial" style="padding: 4px 8px; font-size: 0.75rem; color: #fff;">任务</a>
                             <a href="{{ url_for('contracts.contract_overview', contract_id=c.id) }}" style="font-size: 0.85rem; color: var(--color-primary);">总览</a>
+                            {% if user and user.role in ['admin', 'boss'] %}
+                            <form method="post" action="{{ url_for('contracts.delete_contract', contract_id=c.id) }}" style="display:inline; margin:0;" onsubmit="return confirm('⚠️ 确认删除项目 [{{ c.project_code }}] {{ c.name }}？\n\n此操作将同时删除该项目下所有任务、采购、验收、反馈、文件等数据，且不可恢复！');">
+                                <button type="submit" class="btn-industrial" style="padding: 4px 8px; font-size: 0.75rem; background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); color: #ef4444; cursor: pointer;">删除</button>
+                            </form>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
@@ -212,6 +217,11 @@
             <div class="cc-footer">
                 <a href="{{ url_for('contracts.manage_tasks', contract_id=c.id) }}" class="btn-industrial" style="padding: 6px 12px; font-size: 0.8rem;">任务管理</a>
                 <a href="{{ url_for('contracts.contract_overview', contract_id=c.id) }}" class="btn-industrial" style="background-color: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; font-size: 0.8rem;">详情</a>
+                {% if user and user.role in ['admin', 'boss'] %}
+                <form method="post" action="{{ url_for('contracts.delete_contract', contract_id=c.id) }}" style="display:inline; margin:0;" onsubmit="return confirm('⚠️ 确认删除项目 [{{ c.project_code }}] {{ c.name }}？\n\n此操作将同时删除该项目下所有任务、采购、验收、反馈、文件等数据，且不可恢复！');">
+                    <button type="submit" class="btn-industrial" style="padding: 6px 12px; font-size: 0.8rem; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; cursor: pointer;">删除</button>
+                </form>
+                {% endif %}
             </div>
         </div>
         {% endfor %}

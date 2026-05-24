@@ -1,0 +1,96 @@
+{#
+  done.html - 设置向导完成页 / Setup Wizard Complete Page
+
+  设置完成后显示成功信息并自动跳转到登录页。
+  Shows success message after setup and auto-redirects to login page.
+#}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CORE ERP - 设置完成</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #0a0f1a; color: #e2e8f0;
+            min-height: 100vh; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .wizard-container { width: 100%; max-width: 520px; padding: 24px; }
+        .wizard-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            border-radius: 16px; padding: 48px 40px;
+            backdrop-filter: blur(20px); text-align: center;
+        }
+        .step-indicator { display: flex; gap: 8px; justify-content: center; margin-bottom: 32px; }
+        .step-dot { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; }
+        .success-icon {
+            font-size: 4rem; margin-bottom: 20px;
+            animation: bounce 0.6s ease;
+        }
+        @keyframes bounce {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; color: #22c55e; }
+        .desc { color: #94a3b8; font-size: 0.95rem; line-height: 1.7; margin-bottom: 28px; }
+        .company-name { color: #63b3ed; font-weight: 600; }
+        .redirect-info {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px; padding: 14px; margin-bottom: 24px;
+            font-size: 0.9rem; color: #94a3b8;
+        }
+        .redirect-info span { color: #63b3ed; font-weight: 700; font-size: 1.1rem; }
+        .btn-go {
+            display: inline-block; padding: 12px 32px; border: none; border-radius: 8px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: #fff; font-size: 1rem; font-weight: 600;
+            cursor: pointer; text-decoration: none; transition: all 0.2s;
+        }
+        .btn-go:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.35); }
+    </style>
+</head>
+<body>
+    <div class="wizard-container">
+        <div class="wizard-card">
+            <div class="step-indicator">
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+            </div>
+
+            <div class="success-icon">🎉</div>
+
+            <h2>设置完成！</h2>
+
+            <div class="desc">
+                <span class="company-name">{{ company_name }}</span> 的 CORE ERP 系统已准备就绪。<br>
+                现在可以使用管理员账号登录，并在「用户管理」中为员工创建账号。
+            </div>
+
+            <div class="redirect-info">
+                <span id="countdown">5</span> 秒后自动跳转到登录页面...
+            </div>
+
+            <a href="{{ url_for('auth.login') }}" class="btn-go">立即登录 →</a>
+        </div>
+    </div>
+
+    <script>
+        let sec = 5;
+        const el = document.getElementById('countdown');
+        const timer = setInterval(() => {
+            sec--;
+            el.textContent = sec;
+            if (sec <= 0) {
+                clearInterval(timer);
+                window.location.href = '{{ url_for("auth.login") }}';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

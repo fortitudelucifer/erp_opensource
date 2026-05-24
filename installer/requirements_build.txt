@@ -1,0 +1,8 @@
+# CORE ERP 打包依赖（不含 pyodbc）
+# 如需 SQL Server 支持，请手动安装: pip install pyodbc
+Flask
+Flask-SQLAlchemy
+python-dotenv
+flask-login
+requests
+waitress
